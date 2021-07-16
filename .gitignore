@@ -1,0 +1,4 @@
+**/__pycache__/*
+*.sw[p-z]
+**/local_settings.py
+venv/
