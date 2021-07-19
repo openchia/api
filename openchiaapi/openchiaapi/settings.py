@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'api',
     'drf_yasg',
     'django_filters',
+    'channels',
 ]
 
 
@@ -135,6 +136,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 POOL_URL = 'http://localhost:8080'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+ASGI_APPLICATION = "openchiaapi.asgi.application"
 
 try:
     from .local_settings import *
