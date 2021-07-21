@@ -47,16 +47,6 @@ class Partial(models.Model):
     error = models.CharField(max_length=25, null=True, default=None)
 
 
-class Points(models.Model):
-
-    class Meta:
-        db_table = 'points'
-
-    launcher = models.ForeignKey(Launcher, on_delete=models.CASCADE, related_name='points_partials')
-    points = models.IntegerField()
-    timestamp = models.IntegerField()
-
-
 class Payout(models.Model):
 
     class Meta:
