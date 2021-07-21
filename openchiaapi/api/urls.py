@@ -3,6 +3,7 @@ from rest_framework import routers
 from .views import (
     BlockViewSet,
     LauncherViewSet,
+    PartialViewSet,
     StatsView,
     SpaceView,
 )
@@ -10,6 +11,7 @@ from .views import (
 router = routers.DefaultRouter()
 router.register('block', BlockViewSet)
 router.register('launcher', LauncherViewSet)
+router.register('partial', PartialViewSet)
 
 app_name = 'api'
 urlpatterns = [

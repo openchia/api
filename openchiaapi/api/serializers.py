@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Block, Launcher, Payout, PayoutAddress
+from .models import Block, Launcher, Partial, Payout, PayoutAddress
 
 
 class BlockSerializer(serializers.HyperlinkedModelSerializer):
@@ -22,6 +22,12 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
         if not self.context['total_points']:
             return 0
         return (instance.points / self.context['total_points']) * 100
+
+
+class PartialSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Partial
+        fields = '__all__'
 
 
 class PayoutSerializer(serializers.HyperlinkedModelSerializer):

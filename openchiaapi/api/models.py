@@ -44,6 +44,7 @@ class Partial(models.Model):
     launcher = models.ForeignKey(Launcher, on_delete=models.CASCADE)
     timestamp = models.IntegerField()
     difficulty = models.IntegerField()
+    error = models.CharField(max_length=25, null=True, default=None)
 
 
 class Points(models.Model):

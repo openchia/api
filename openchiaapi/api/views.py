@@ -8,10 +8,11 @@ from rest_framework import filters, mixins, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .models import Block, Launcher, Payout, PayoutAddress, Space
+from .models import Block, Launcher, Partial, Payout, PayoutAddress, Space
 from .serializers import (
     BlockSerializer,
     LauncherSerializer,
+    PartialSerializer,
     PayoutSerializer,
     PayoutAddressSerializer,
     StatsSerializer,
@@ -77,6 +78,14 @@ class StatsView(APIView):
         })
         pi.is_valid()
         return Response(pi.data)
+
+
+class PartialViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Partial.objects.all()
+    serializer_class = PartialSerializer
+    filterset_fields = ['launcher']
+    ordering_fields = ['timestamp']
+    ordering = ['-timestamp']
 
 
 class PayoutViewSet(viewsets.ReadOnlyModelViewSet):
