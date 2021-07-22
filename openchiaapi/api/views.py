@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as django_filters
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, mixins, viewsets
@@ -80,10 +81,20 @@ class StatsView(APIView):
         return Response(pi.data)
 
 
+
+class PartialFilter(django_filters.FilterSet):
+    min_timestamp = django_filters.NumberFilter(field_name='timestamp', lookup_expr='gte')
+
+    class Meta:
+        model = Partial
+        fields = ['launcher', 'timestamp']
+
+
 class PartialViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Partial.objects.all()
     serializer_class = PartialSerializer
-    filterset_fields = ['launcher']
+    filterset_fields = ['launcher', 'timestamp', 'min_timestamp']
+    filterset_class = PartialFilter
     ordering_fields = ['timestamp']
     ordering = ['-timestamp']
 
