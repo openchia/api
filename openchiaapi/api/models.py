@@ -13,7 +13,7 @@ class Block(models.Model):
     confirmed_block_index = models.IntegerField()
     puzzle_hash = models.CharField(max_length=64)
     amount = models.BigIntegerField()
-    farmed_by = models.CharField(max_length=64, null=True)
+    farmed_by = models.ForeignKey('api.Launcher', on_delete=models.SET_NULL, null=True)
     payout = models.ForeignKey('Payout', on_delete=models.SET_NULL, null=True, default=None)
 
 
