@@ -20,7 +20,7 @@ from .serializers import (
     SpaceSerializer,
 )
 from .utils import (
-    get_pool_info, get_node_info_sync, estimated_time_to_win_sync,
+    get_pool_info, get_node_info, estimated_time_to_win,
 )
 
 
@@ -65,8 +65,8 @@ class StatsView(APIView):
         except Space.DoesNotExist:
             size = 0
 
-        blockchain_state = get_node_info_sync()
-        minutes_to_win = estimated_time_to_win_sync(size, blockchain_state['space'])
+        blockchain_state = get_node_info()
+        minutes_to_win = estimated_time_to_win(size)
         pi = StatsSerializer(data={
             'fee': Decimal(pool_info['fee']),
             'farmers': farmers,
@@ -74,7 +74,7 @@ class StatsView(APIView):
             'rewards_blocks': coinrecord.count(),
             'pool_space': size,
             'estimate_win': minutes_to_win,
-            'blockchain_height': blockchain_state['peak'].height,
+            'blockchain_height': blockchain_state['peak']['height'],
             'blockchain_space': blockchain_state['space'],
         })
         pi.is_valid()
