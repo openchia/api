@@ -1,3 +1,13 @@
+import os
+import yaml
+
+from blspy import AugSchemeMPL, G1Element, G2Element
+from chia.protocols.pool_protocol import validate_authentication_token, AuthenticationPayload
+from chia.util.bech32m import decode_puzzle_hash
+from chia.util.byte_types import hexstr_to_bytes
+from chia.util.hash import std_hash
+from chia.util.ints import uint64
+from chia.types.blockchain_format.sized_bytes import bytes32
 from datetime import datetime, timedelta
 from decimal import Decimal
 from django.db.models import Sum
@@ -6,6 +16,7 @@ from django_filters import rest_framework as django_filters
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, mixins, viewsets
+from rest_framework.exceptions import NotAuthenticated, NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -13,6 +24,8 @@ from .models import Block, Launcher, Partial, Payout, PayoutAddress, Space
 from .serializers import (
     BlockSerializer,
     LauncherSerializer,
+    LauncherUpdateSerializer,
+    LoginSerializer,
     PartialSerializer,
     PayoutSerializer,
     PayoutAddressSerializer,
@@ -24,7 +37,16 @@ from .utils import (
 )
 
 
-POOL_DEFAULT_TARGET_ADDRESS = None
+def get_pool_target_address():
+    cfg_path = os.environ.get('POOL_CONFIG_PATH') or ''
+    if not os.path.exists(cfg_path):
+        raise ValueError('POOL_CONFIG_PATH does not exist.')
+    with open(cfg_path, 'r') as f:
+        cfg = yaml.safe_load(f.read())
+    return cfg['default_target_address']
+
+
+POOL_TARGET_ADDRESS = get_pool_target_address()
 
 
 class BlockViewSet(viewsets.ReadOnlyModelViewSet):
@@ -35,9 +57,13 @@ class BlockViewSet(viewsets.ReadOnlyModelViewSet):
     ordering = ['-confirmed_block_index']
 
 
-class LauncherViewSet(viewsets.ReadOnlyModelViewSet):
+class LauncherViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Launcher.objects.filter(is_pool_member=True)
-    serializer_class = LauncherSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['difficulty', 'launcher_id', 'name']
     search_fields = ['launcher_id', 'name']
@@ -51,13 +77,31 @@ class LauncherViewSet(viewsets.ReadOnlyModelViewSet):
         )['total']
         return context
 
+    def get_serializer_class(self, *args, **kwargs):
+        if self.request.method == 'PUT':
+            return LauncherUpdateSerializer
+        return LauncherSerializer
+
+    def update(self, request, pk):
+        launcher_id = request.session.get('launcher_id')
+        if not launcher_id or launcher_id != pk:
+            raise NotAuthenticated()
+        launcher = Launcher.objects.filter(launcher_id=pk)
+        if not launcher.exists():
+            raise NotFound()
+        launcher = launcher[0]
+        s = LauncherUpdateSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        launcher.name = s.validated_data['name']
+        launcher.save()
+        return Response(s.validated_data)
+
 
 class StatsView(APIView):
 
     @swagger_auto_schema(responses={200: StatsSerializer(many=False)})
     def get(self, request, format=None):
         coinrecord = Block.objects.order_by('-confirmed_block_index')
-        last_cr = coinrecord[0] if coinrecord.exists() else None
         farmers = Launcher.objects.filter(is_pool_member=True).count()
         pool_info = get_pool_info()
         try:
@@ -81,13 +125,53 @@ class StatsView(APIView):
         return Response(pi.data)
 
 
-
 class PartialFilter(django_filters.FilterSet):
     min_timestamp = django_filters.NumberFilter(field_name='timestamp', lookup_expr='gte')
 
     class Meta:
         model = Partial
         fields = ['launcher', 'timestamp']
+
+
+class LoginView(APIView):
+    """
+    Login using parameters from chia plotnft.
+    """
+
+    @swagger_auto_schema(request_body=LoginSerializer)
+    def post(self, request):
+        s = LoginSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+
+        launcher_id = hexstr_to_bytes(s.validated_data["launcher_id"])
+        authentication_token = uint64(s.validated_data["authentication_token"])
+        if not validate_authentication_token(authentication_token, 5):
+            raise NotAuthenticated(detail='Invalid authentication_token')
+
+        launcher = Launcher.objects.filter(launcher_id=s.validated_data["launcher_id"])
+        if not launcher.exists():
+            raise NotFound()
+        launcher = launcher[0]
+
+        signature = G2Element.from_bytes(hexstr_to_bytes(s.validated_data["signature"]))
+        message = std_hash(
+            AuthenticationPayload(
+                "get_login",
+                launcher_id,
+                bytes32(decode_puzzle_hash(POOL_TARGET_ADDRESS)),
+                authentication_token,
+            )
+        )
+        if not AugSchemeMPL.verify(
+            G1Element.from_bytes(bytes.fromhex(launcher.authentication_public_key)),
+            message,
+            signature
+        ):
+            raise NotAuthenticated(
+                detail=f"Failed to verify signature {signature} for launcher_id {launcher_id.hex()}."
+            )
+        request.session['launcher_id'] = s.validated_data['launcher_id']
+        return Response(True)
 
 
 class PartialViewSet(viewsets.ReadOnlyModelViewSet):

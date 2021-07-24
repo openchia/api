@@ -3,6 +3,7 @@ from rest_framework import routers
 from .views import (
     BlockViewSet,
     LauncherViewSet,
+    LoginView,
     PartialViewSet,
     PayoutViewSet,
     StatsView,
@@ -18,6 +19,7 @@ router.register('payout', PayoutViewSet)
 app_name = 'api'
 urlpatterns = [
     path('', include(router.urls)),
+    path('login', LoginView.as_view()),
     path('stats', StatsView.as_view()),
     path('space', SpaceView.as_view()),
 ]

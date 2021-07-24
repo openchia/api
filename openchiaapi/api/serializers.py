@@ -18,12 +18,22 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
         return (instance.points / self.context['total_points']) * 100
 
 
+class LauncherUpdateSerializer(serializers.Serializer):
+    name = serializers.CharField(required=True)
+
+
 class BlockSerializer(serializers.HyperlinkedModelSerializer):
     farmed_by = LauncherSerializer()
 
     class Meta:
         model = Block
         fields = '__all__'
+
+
+class LoginSerializer(serializers.Serializer):
+    launcher_id = serializers.CharField()
+    authentication_token = serializers.IntegerField()
+    signature = serializers.CharField()
 
 
 class PartialSerializer(serializers.HyperlinkedModelSerializer):
