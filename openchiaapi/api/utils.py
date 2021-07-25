@@ -27,10 +27,12 @@ def get_pool_info():
 
 
 def get_node_info():
-    return BLOCKCHAIN_STATE
+    return BLOCKCHAIN_STATE or {'space': 0, 'peak': {'height': 0}}
 
 
 def estimated_time_to_win(pool_size):
+    if BLOCKCHAIN_STATE is None:
+        return -1
     blockchain_space = BLOCKCHAIN_STATE['space']
     proportion = pool_size / blockchain_space if blockchain_space else -1
     minutes = int((BLOCKCHAIN_STATE['avg_block_time'] / 60) / proportion) if proportion else -1
