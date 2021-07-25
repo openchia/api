@@ -68,7 +68,6 @@ def setup_node_client():
             parent_conn, child_conn = multiprocessing.Pipe(duplex=False)
             process = multiprocessing.Process(
                 target=blockchain_state,
-                daemon=True,
                 args=(child_conn,),
             )
         except Exception:
