@@ -34,6 +34,7 @@ class Launcher(models.Model):
     difficulty = models.BigIntegerField()
     payout_instructions = models.TextField()
     is_pool_member = models.BooleanField()
+    estimated_size = models.BigIntegerField(default=0)
 
 
 class Partial(models.Model):
