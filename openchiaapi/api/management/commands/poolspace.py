@@ -9,7 +9,9 @@ from api.models import Partial, Space
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        total = Partial.objects.filter(error=None, timestamp__gte=time.time() - 60 * 60 * 24).aggregate(
+        interval = 60 * 60 * 24
+        total = Partial.objects.filter(error=None, timestamp__gte=time.time() - interval).aggregate(
             total=Sum('difficulty')
         )['total'] or 0
-        Space.objects.create(date=timezone.now(), size=int(total * 10472848254.5664))
+        size = int(total / (interval * 1.088e-15))
+        Space.objects.create(date=timezone.now(), size=size)
