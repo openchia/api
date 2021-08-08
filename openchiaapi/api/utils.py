@@ -2,6 +2,7 @@ import asyncio
 import cachetools
 import logging
 import multiprocessing
+import os
 import requests
 import signal
 import threading
@@ -23,8 +24,9 @@ SHUTTING_DOWN = False
 def sighandler(*args, **kwargs):
     global SHUTTING_DOWN
     SHUTTING_DOWN = True
+    os.kill(os.getpid(), signal.SIGTERM)
 
-signal.signal(signal.SIGCHLD, sighandler)
+signal.signal(signal.SIGQUIT, sighandler)
 
 
 @cachetools.cached(cachetools.TTLCache(maxsize=1, ttl=3600))
@@ -64,6 +66,7 @@ async def node_loop(child_conn):
 
 
 def blockchain_state(child_conn):
+    prctl.set_pdeathsig(signal.SIGKILL)
     try:
         asyncio.get_event_loop().run_until_complete(node_loop(child_conn))
     except Exception:
@@ -74,6 +77,7 @@ def blockchain_state(child_conn):
 
 def setup_node_client():
     global BLOCKCHAIN_STATE
+    global SHUTTING_DOWN
     while not SHUTTING_DOWN:
         try:
             parent_conn, child_conn = multiprocessing.Pipe(duplex=False)
@@ -96,8 +100,10 @@ def setup_node_client():
                         break
                     BLOCKCHAIN_STATE = recv
                 else:
-                    if not process.is_alive():
+                    if not process.is_alive() or SHUTTING_DOWN:
+                        logger.info('Blockchain state process no longer alive')
                         break
+            process.terminate()
         except Exception:
             logger.error('Failed getting blockchain state', exc_info=True)
         time.sleep(5)

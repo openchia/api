@@ -2,7 +2,7 @@ git+git://github.com/Chia-Network/chia-blockchain.git@main#egg=chia-blockchain
 djangorestframework==3.12.4
 drf-yasg==1.20.0
 requests==2.25.1
-uvicorn==0.14.0
+daphne
 django-filter==2.4.0
 psycopg2
 channels

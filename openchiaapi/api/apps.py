@@ -10,6 +10,6 @@ class ApiConfig(AppConfig):
     name = 'api'
 
     def ready(self):
-        if sys.argv[0:2] == ['manage.py', 'runserver'] or sys.argv[0].endswith('/uvicorn'):
+        if sys.argv[0:2] == ['manage.py', 'runserver'] or sys.argv[0].endswith(('/uvicorn', '/daphne')):
             t = threading.Thread(target=setup_node_client)
             t.start()
