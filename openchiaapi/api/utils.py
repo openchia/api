@@ -89,7 +89,3 @@ def setup_node_client():
         except Exception:
             logger.error('Failed getting blockchain state', exc_info=True)
         time.sleep(5)
-
-
-NODE_CLIENT_THREAD = threading.Thread(target=setup_node_client, daemon=True)
-NODE_CLIENT_THREAD.start()

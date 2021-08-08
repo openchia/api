@@ -120,6 +120,7 @@ class StatsView(APIView):
             'estimate_win': minutes_to_win,
             'blockchain_height': blockchain_state['peak']['height'],
             'blockchain_space': blockchain_state['space'],
+            'reward_system': 'PPLNS',
         })
         pi.is_valid()
         return Response(pi.data)

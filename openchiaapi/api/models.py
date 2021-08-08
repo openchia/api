@@ -1,4 +1,4 @@
-from datetime import datetime
+from django.utils import timezone
 from django.db import models
 
 
@@ -53,7 +53,7 @@ class Payout(models.Model):
     class Meta:
         db_table = 'payout'
 
-    datetime = models.DateTimeField(default=datetime.now)
+    datetime = models.DateTimeField(default=timezone.now)
     amount = models.BigIntegerField()
     fee = models.BigIntegerField(default=0)
 

@@ -65,6 +65,7 @@ class StatsSerializer(serializers.Serializer):
     rewards_blocks = serializers.IntegerField()
     pool_space = serializers.IntegerField()
     farmers = serializers.IntegerField()
+    reward_system = serializers.CharField()
 
 
 class SpaceSerializer(serializers.Serializer):

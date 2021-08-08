@@ -7,3 +7,4 @@ django-filter==2.4.0
 psycopg2
 channels
 pyinotify
+cachetools
