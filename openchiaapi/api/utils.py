@@ -66,7 +66,6 @@ async def node_loop(child_conn):
 
 
 def blockchain_state(child_conn):
-    prctl.set_pdeathsig(signal.SIGKILL)
     try:
         asyncio.get_event_loop().run_until_complete(node_loop(child_conn))
     except Exception:
