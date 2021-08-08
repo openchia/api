@@ -3,6 +3,7 @@ import cachetools
 import logging
 import multiprocessing
 import requests
+import signal
 import threading
 import time
 
@@ -16,6 +17,14 @@ from django.conf import settings
 logger = logging.getLogger('utils')
 BLOCKCHAIN_STATE = None
 BLOCKCHAIN_STATE_EVENT = threading.Event()
+SHUTTING_DOWN = False
+
+
+def sighandler(*args, **kwargs):
+    global SHUTTING_DOWN
+    SHUTTING_DOWN = True
+
+signal.signal(signal.SIGCHLD, sighandler)
 
 
 @cachetools.cached(cachetools.TTLCache(maxsize=1, ttl=3600))
@@ -65,12 +74,11 @@ def blockchain_state(child_conn):
 
 def setup_node_client():
     global BLOCKCHAIN_STATE
-    while True:
+    while not SHUTTING_DOWN:
         try:
             parent_conn, child_conn = multiprocessing.Pipe(duplex=False)
             process = multiprocessing.Process(
                 target=blockchain_state,
-                daemon=True,
                 args=(child_conn,),
             )
         except Exception:
@@ -82,10 +90,14 @@ def setup_node_client():
             process.start()
             while True:
                 # FIXME: EOF is not being raised when conn closes
-                recv = parent_conn.recv()
-                if recv is EOFError:
-                    break
-                BLOCKCHAIN_STATE = recv
+                if parent_conn.poll(2):
+                    recv = parent_conn.recv()
+                    if recv is EOFError:
+                        break
+                    BLOCKCHAIN_STATE = recv
+                else:
+                    if not process.is_alive():
+                        break
         except Exception:
             logger.error('Failed getting blockchain state', exc_info=True)
         time.sleep(5)
