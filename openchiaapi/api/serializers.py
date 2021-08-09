@@ -10,6 +10,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
         fields = [
             'launcher_id', 'name', 'p2_singleton_puzzle_hash', 'points', 'difficulty',
             'is_pool_member', 'points_of_total', 'estimated_size',
+            'joined_at',
         ]
 
     def get_points_of_total(self, instance):
