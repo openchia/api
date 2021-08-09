@@ -31,6 +31,8 @@ class Launcher(models.Model):
     singleton_tip_state = models.BinaryField()
     p2_singleton_puzzle_hash = models.CharField(max_length=64)
     points = models.BigIntegerField()
+    points_pplns = models.BigIntegerField()
+    share_pplns = models.DecimalField(max_digits=21, decimal_places=20)
     difficulty = models.BigIntegerField()
     payout_instructions = models.TextField()
     is_pool_member = models.BooleanField()
