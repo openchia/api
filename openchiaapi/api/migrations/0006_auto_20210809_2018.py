@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='launcher',
             name='joined_at',
-            field=models.DateTimeField(default=django.utils.timezone.now),
+            field=models.DateTimeField(default=None, null=True),
         ),
         migrations.AlterField(
             model_name='payout',

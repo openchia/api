@@ -37,7 +37,7 @@ class Launcher(models.Model):
     payout_instructions = models.TextField()
     is_pool_member = models.BooleanField()
     estimated_size = models.BigIntegerField(default=0)
-    joined_at = models.DateTimeField(default=timezone.now)
+    joined_at = models.DateTimeField(default=None, null=True)
 
 
 class Partial(models.Model):
