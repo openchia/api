@@ -38,6 +38,8 @@ class Launcher(models.Model):
     is_pool_member = models.BooleanField()
     estimated_size = models.BigIntegerField(default=0)
     joined_at = models.DateTimeField(default=None, null=True)
+    email = models.EmailField(default=None, null=True)
+    notify_missing_partials_hours = models.IntegerField(default=1, null=True)
 
 
 class Partial(models.Model):

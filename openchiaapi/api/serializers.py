@@ -21,9 +21,18 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             return 0
         return (instance.points / self.context['total_points']) * 100
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if self.context['request'].session.get('launcher_id') == ret['launcher_id']:
+            ret['email'] = instance.email
+            ret['notify_missing_partials_hours'] = instance.notify_missing_partials_hours
+        return ret
+
 
 class LauncherUpdateSerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
+    email = serializers.EmailField(required=False, allow_null=True)
+    notify_missing_partials_hours = serializers.CharField(required=False, allow_null=True)
 
 
 class BlockSerializer(serializers.HyperlinkedModelSerializer):

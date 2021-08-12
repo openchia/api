@@ -93,6 +93,10 @@ class LauncherViewSet(
         s = LauncherUpdateSerializer(data=request.data)
         s.is_valid(raise_exception=True)
         launcher.name = s.validated_data['name']
+        if 'email' in s.validated_data:
+            launcher.email = s.validated_data['email']
+        if 'notify_missing_partials_hours' in s.validated_data:
+            launcher.notify_missing_partials_hours = s.validated_data['notify_missing_partials_hours']
         launcher.save()
         return Response(s.validated_data)
 
@@ -146,7 +150,7 @@ class LoginView(APIView):
 
         launcher_id = hexstr_to_bytes(s.validated_data["launcher_id"])
         authentication_token = uint64(s.validated_data["authentication_token"])
-        if not validate_authentication_token(authentication_token, 5):
+        if not validate_authentication_token(authentication_token, 10):
             raise NotAuthenticated(detail='Invalid authentication_token')
 
         launcher = Launcher.objects.filter(launcher_id=s.validated_data["launcher_id"])
