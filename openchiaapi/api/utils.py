@@ -67,7 +67,7 @@ async def node_loop(child_conn):
 
 def blockchain_state(child_conn):
     try:
-        asyncio.get_event_loop().run_until_complete(node_loop(child_conn))
+        asyncio.run(node_loop(child_conn))
     except Exception:
         child_conn.send(EOFError)
         child_conn.close()
