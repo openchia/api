@@ -59,7 +59,9 @@ class PayoutSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Payout
-        fields = '__all__'
+        fields = (
+            'id', 'datetime', 'amount', 'fee',
+        )
 
 
 class PayoutAddressSerializer(serializers.HyperlinkedModelSerializer):
