@@ -56,17 +56,21 @@ class PartialSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class PayoutSerializer(serializers.HyperlinkedModelSerializer):
+
     class Meta:
         model = Payout
         fields = '__all__'
 
 
 class PayoutAddressSerializer(serializers.HyperlinkedModelSerializer):
-    payout = PayoutSerializer()
+    launcher = LauncherSerializer
 
     class Meta:
         model = PayoutAddress
-        fields = '__all__'
+        fields = (
+            'id', 'payout', 'puzzle_hash', 'launcher', 'amount', 'transaction',
+            'confirmed_block_index',
+        )
 
 
 class StatsSerializer(serializers.Serializer):
