@@ -5,6 +5,7 @@ from .views import (
     LauncherViewSet,
     LoginView,
     PartialViewSet,
+    PayoutAddressViewSet,
     PayoutViewSet,
     StatsView,
     SpaceView,
@@ -15,6 +16,7 @@ router.register('block', BlockViewSet)
 router.register('launcher', LauncherViewSet)
 router.register('partial', PartialViewSet)
 router.register('payout', PayoutViewSet)
+router.register('payoutaddress', PayoutAddressViewSet)
 
 app_name = 'api'
 urlpatterns = [
