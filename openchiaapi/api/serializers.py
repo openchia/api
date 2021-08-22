@@ -82,6 +82,9 @@ class StatsSerializer(serializers.Serializer):
     estimate_win = serializers.IntegerField()
     rewards_amount = serializers.DecimalField(max_digits=10, decimal_places=5)
     rewards_blocks = serializers.IntegerField()
+    last_rewards = serializers.ListField(
+        child=serializers.DictField(),
+    )
     pool_space = serializers.IntegerField()
     farmers = serializers.IntegerField()
     reward_system = serializers.CharField()

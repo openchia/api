@@ -125,6 +125,10 @@ class StatsView(APIView):
             'blockchain_height': blockchain_state['peak']['height'],
             'blockchain_space': blockchain_state['space'],
             'reward_system': 'PPLNS',
+            'last_rewards': [{
+                'date': datetime.utcfromtimestamp(i.timestamp),
+                'height': i.confirmed_block_index,
+            } for i in coinrecord[:10]],
         })
         pi.is_valid()
         return Response(pi.data)
