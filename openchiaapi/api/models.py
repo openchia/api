@@ -14,7 +14,9 @@ class Block(models.Model):
     puzzle_hash = models.CharField(max_length=64)
     amount = models.BigIntegerField()
     farmed_by = models.ForeignKey('api.Launcher', on_delete=models.SET_NULL, null=True)
-    payout = models.ForeignKey('Payout', on_delete=models.SET_NULL, null=True, default=None)
+    payout = models.ForeignKey(
+        'Payout', related_name='blocks', on_delete=models.SET_NULL, null=True, default=None,
+    )
 
 
 class Launcher(models.Model):

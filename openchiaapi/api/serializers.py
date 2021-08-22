@@ -60,12 +60,12 @@ class PayoutSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Payout
         fields = (
-            'id', 'datetime', 'amount', 'fee',
+            'id', 'datetime', 'amount', 'fee', 'blocks',
         )
 
 
 class PayoutAddressSerializer(serializers.HyperlinkedModelSerializer):
-    launcher = LauncherSerializer
+    launcher = LauncherSerializer()
 
     class Meta:
         model = PayoutAddress
