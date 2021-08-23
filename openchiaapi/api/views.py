@@ -20,7 +20,7 @@ from rest_framework.exceptions import NotAuthenticated, NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .models import Block, Launcher, Partial, Payout, PayoutAddress, Space
+from .models import Block, GlobalInfo, Launcher, Partial, Payout, PayoutAddress, Space
 from .serializers import (
     BlockSerializer,
     LauncherSerializer,
@@ -33,7 +33,7 @@ from .serializers import (
     SpaceSerializer,
 )
 from .utils import (
-    get_pool_info, get_node_info, estimated_time_to_win,
+    get_pool_info, estimated_time_to_win,
 )
 
 
@@ -63,9 +63,9 @@ class LauncherViewSet(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
-    queryset = Launcher.objects.filter(is_pool_member=True)
+    queryset = Launcher.objects.all()
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['difficulty', 'launcher_id', 'name']
+    filterset_fields = ['difficulty', 'launcher_id', 'name', 'is_pool_member']
     search_fields = ['launcher_id', 'name']
     ordering_fields = ['points', 'difficulty']
     ordering = ['-points']
@@ -113,8 +113,8 @@ class StatsView(APIView):
         except Space.DoesNotExist:
             size = 0
 
-        blockchain_state = get_node_info()
-        minutes_to_win = estimated_time_to_win(size)
+        globalinfo = GlobalInfo.load()
+        minutes_to_win = estimated_time_to_win(size, globalinfo.blockchain_space)
         pi = StatsSerializer(data={
             'fee': Decimal(pool_info['fee']),
             'farmers': farmers,
@@ -122,13 +122,14 @@ class StatsView(APIView):
             'rewards_blocks': coinrecord.count(),
             'pool_space': size,
             'estimate_win': minutes_to_win,
-            'blockchain_height': blockchain_state['peak']['height'],
-            'blockchain_space': blockchain_state['space'],
+            'blockchain_height': globalinfo.blockchain_height,
+            'blockchain_space': globalinfo.blockchain_space,
             'reward_system': 'PPLNS',
             'last_rewards': [{
                 'date': datetime.utcfromtimestamp(i.timestamp),
                 'height': i.confirmed_block_index,
             } for i in coinrecord[:10]],
+            'xch_current_price': globalinfo.xch_current_price,
         })
         pi.is_valid()
         return Response(pi.data)

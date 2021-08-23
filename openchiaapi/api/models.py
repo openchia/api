@@ -85,3 +85,31 @@ class Space(models.Model):
 
     date = models.DateTimeField()
     size = models.BigIntegerField()
+
+
+class SingletonModel(models.Model):
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super(SingletonModel, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    @classmethod
+    def load(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+
+class GlobalInfo(SingletonModel):
+
+    class Meta:
+        db_table = 'globalinfo'
+
+    blockchain_height = models.BigIntegerField(default=0)
+    blockchain_space = models.BigIntegerField(default=0)
+    xch_current_price = models.JSONField(default=dict)
