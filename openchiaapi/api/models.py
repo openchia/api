@@ -111,5 +111,5 @@ class GlobalInfo(SingletonModel):
         db_table = 'globalinfo'
 
     blockchain_height = models.BigIntegerField(default=0)
-    blockchain_space = models.BigIntegerField(default=0)
+    blockchain_space = models.CharField(default='0', max_length=128)
     xch_current_price = models.JSONField(default=dict)
