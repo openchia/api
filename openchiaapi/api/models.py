@@ -14,6 +14,9 @@ class Block(models.Model):
     puzzle_hash = models.CharField(max_length=64)
     amount = models.BigIntegerField()
     farmed_by = models.ForeignKey('api.Launcher', on_delete=models.SET_NULL, null=True)
+    pool_space = models.BigIntegerField(default=0)
+    estimate_to_win = models.BigIntegerField(default=-1)
+    luck = models.IntegerField(default=-1)
     payout = models.ForeignKey(
         'Payout', related_name='blocks', on_delete=models.SET_NULL, null=True, default=None,
     )
@@ -53,6 +56,7 @@ class Partial(models.Model):
     timestamp = models.IntegerField()
     difficulty = models.IntegerField()
     error = models.CharField(max_length=25, null=True, default=None)
+    harvester_id = models.CharField(max_length=64, null=True, default=None)
 
 
 class Payout(models.Model):
