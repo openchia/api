@@ -94,3 +94,12 @@ class StatsSerializer(serializers.Serializer):
 class SpaceSerializer(serializers.Serializer):
     date = serializers.DateTimeField()
     size = serializers.IntegerField()
+
+
+class XCHScanStatsSerializer(serializers.Serializer):
+    poolInfo = serializers.DictField()
+    farmedBlocks = serializers.ListField(
+        child=serializers.DictField(),
+    )
+    capacityBytes = serializers.IntegerField()
+    farmers = serializers.IntegerField()

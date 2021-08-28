@@ -9,6 +9,7 @@ from .views import (
     PayoutViewSet,
     StatsView,
     SpaceView,
+    XCHScanStatsView,
 )
 
 router = routers.DefaultRouter()
@@ -23,5 +24,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('login', LoginView.as_view()),
     path('stats', StatsView.as_view()),
+    path('xchscan_stats', XCHScanStatsView.as_view()),
     path('space', SpaceView.as_view()),
 ]

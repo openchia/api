@@ -31,6 +31,7 @@ from .serializers import (
     PayoutAddressSerializer,
     StatsSerializer,
     SpaceSerializer,
+    XCHScanStatsSerializer,
 )
 from .utils import (
     get_pool_info, estimated_time_to_win,
@@ -130,6 +131,35 @@ class StatsView(APIView):
                 'height': i.confirmed_block_index,
             } for i in coinrecord[:10]],
             'xch_current_price': globalinfo.xch_current_price,
+        })
+        pi.is_valid()
+        return Response(pi.data)
+
+
+class XCHScanStatsView(APIView):
+
+    @swagger_auto_schema(responses={200: XCHScanStatsSerializer(many=False)})
+    def get(self, request, format=None):
+        coinrecord = Block.objects.order_by('-confirmed_block_index')
+        farmers = Launcher.objects.filter(is_pool_member=True).count()
+        pool_info = get_pool_info()
+        try:
+            size = Space.objects.latest('id').size
+        except Space.DoesNotExist:
+            size = 0
+
+        pi = XCHScanStatsSerializer(data={
+            'poolInfo': {
+                'puzzle_hash': '0x' + decode_puzzle_hash(POOL_TARGET_ADDRESS).hex(),
+                'fee': Decimal(pool_info['fee']),
+                'minPay': 0,
+            },
+            'farmers': farmers,
+            'capacityBytes': size,
+            'farmedBlocks': [{
+                'time': i.timestamp,
+                'height': i.confirmed_block_index,
+            } for i in coinrecord[:10]],
         })
         pi.is_valid()
         return Response(pi.data)
