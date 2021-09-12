@@ -115,7 +115,9 @@ class StatsView(APIView):
             size = 0
 
         globalinfo = GlobalInfo.load()
-        minutes_to_win = estimated_time_to_win(size, int(globalinfo.blockchain_space))
+        minutes_to_win = estimated_time_to_win(
+            size, int(globalinfo.blockchain_space), globalinfo.blockchain_avg_block_time,
+        )
         pi = StatsSerializer(data={
             'fee': Decimal(pool_info['fee']),
             'farmers': farmers,
