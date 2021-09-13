@@ -60,6 +60,16 @@ class Partial(models.Model):
     harvester_id = models.CharField(max_length=64, null=True, default=None)
 
 
+class PendingPartial(models.Model):
+
+    class Meta:
+        db_table = 'pending_partial'
+
+    partial = models.JSONField(default=dict)
+    time_received = models.BigIntegerField()
+    points_received = models.IntegerField()
+
+
 class Payout(models.Model):
 
     class Meta:
