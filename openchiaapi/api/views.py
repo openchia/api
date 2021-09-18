@@ -255,5 +255,7 @@ class SpaceView(APIView):
     )
     def get(self, request, format=None):
         days = self.request.query_params.get('days') or self.DEFAULT_DAYS
-        size = Space.objects.filter(date__gte=datetime.now() - timedelta(days=int(days)))
+        size = Space.objects.filter(
+            date__gte=datetime.now() - timedelta(days=int(days))
+        ).order_by('date')
         return Response([{'date': i.date, 'size': i.size} for i in size])
