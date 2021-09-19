@@ -200,7 +200,7 @@ class LoginView(APIView):
             AuthenticationPayload(
                 "get_login",
                 launcher_id,
-                PoolState.from_bytes(launcher[0].singleton_tip_state).target_puzzle_hash,
+                PoolState.from_bytes(launcher.singleton_tip_state).target_puzzle_hash,
                 authentication_token,
             )
         )
