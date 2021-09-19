@@ -87,6 +87,7 @@ class PayoutAddress(models.Model):
 
     payout = models.ForeignKey(Payout, on_delete=models.CASCADE)
     puzzle_hash = models.CharField(max_length=64)
+    pool_puzzle_hash = models.CharField(max_length=64, default='')
     launcher = models.ForeignKey(Launcher, on_delete=models.SET_NULL, null=True, default=None)
     amount = models.BigIntegerField()
     transaction = models.CharField(max_length=100, null=True)
