@@ -2,12 +2,12 @@ import os
 import yaml
 
 from blspy import AugSchemeMPL, G1Element, G2Element
+from chia.pools.pool_wallet_info import PoolState
 from chia.protocols.pool_protocol import validate_authentication_token, AuthenticationPayload
 from chia.util.bech32m import decode_puzzle_hash
 from chia.util.byte_types import hexstr_to_bytes
 from chia.util.hash import std_hash
 from chia.util.ints import uint64
-from chia.types.blockchain_format.sized_bytes import bytes32
 from datetime import datetime, timedelta
 from decimal import Decimal
 from django.db.models import Sum
@@ -200,7 +200,7 @@ class LoginView(APIView):
             AuthenticationPayload(
                 "get_login",
                 launcher_id,
-                bytes32(bytes.fromhex(launcher.pool_puzzle_hash)),
+                PoolState.from_bytes(launcher[0].singleton_tip_state).target_puzzle_hash,
                 authentication_token,
             )
         )
