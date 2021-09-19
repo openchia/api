@@ -44,7 +44,7 @@ def get_pool_target_address():
         raise ValueError('POOL_CONFIG_PATH does not exist.')
     with open(cfg_path, 'r') as f:
         cfg = yaml.safe_load(f.read())
-    return cfg['default_target_address']
+    return cfg['wallets'][0]['address']
 
 
 POOL_TARGET_ADDRESS = get_pool_target_address()
@@ -200,7 +200,7 @@ class LoginView(APIView):
             AuthenticationPayload(
                 "get_login",
                 launcher_id,
-                bytes32(decode_puzzle_hash(POOL_TARGET_ADDRESS)),
+                bytes32(bytes.fromhex(launcher.pool_puzzle_hash)),
                 authentication_token,
             )
         )
