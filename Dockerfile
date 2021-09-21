@@ -10,7 +10,9 @@ RUN apt-get install python3-virtualenv libpq-dev git vim procps net-tools iputil
 
 EXPOSE 8000
 
-COPY ./requirements.txt .
+WORKDIR /root
+
+COPY ./requirements.txt /root
 RUN virtualenv -p python3 venv
 RUN ./venv/bin/pip install -r requirements.txt
 
