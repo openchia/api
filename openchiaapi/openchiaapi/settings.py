@@ -1,4 +1,13 @@
+import os
+import yaml
 from pathlib import Path
+
+
+django_settings = os.environ.get('DJANGO_SETTINGS_FILE')
+if django_settings and os.path.exists(django_settings):
+    with open(django_settings, 'r') as f:
+        django_settings = yaml.safe_load(f)
+django_settings = django_settings or {}
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -8,7 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure'
+SECRET_KEY = django_settings.get('secret_key') or 'django-insecure'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -77,16 +86,29 @@ WSGI_APPLICATION = 'openchiaapi.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'pool',
-        'USER': 'pool',
-        'PASSWORD': 'pool',
-        'HOST': 'localhost',
-        'PORT': 5432,
+if 'database' in django_settings:
+    database = django_settings['database']
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': database['name'],
+            'USER': database['user'],
+            'PASSWORD': database['password'],
+            'HOST': database['host'],
+            'PORT': database.get('port', 5432),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'pool',
+            'USER': 'pool',
+            'PASSWORD': 'abcd1234',
+            'HOST': 'localhost',
+            'PORT': 5432,
+        }
+    }
 
 
 # Password validation
@@ -134,12 +156,7 @@ STATIC_ROOT = BASE_DIR / 'static'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-POOL_URL = 'http://localhost:8080'
+POOL_URL = django_settings.get('pool_url') or 'http://localhost:8080'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ASGI_APPLICATION = "openchiaapi.asgi.application"
-
-try:
-    from .local_settings import *
-except ImportError:
-    pass
