@@ -2,10 +2,10 @@
 set -e
 
 export CHIA_ROOT=/data/chia/${CHIA_NETWORK:=mainnet}
+export POOL_CONFIG_PATH="/data/config.yaml"
+export POOL_LOG_PATH="/data/pool_log/stdout"
 
-trap "killall python" TERM
-
-simpleproxy -d -L 127.0.0.1:25 -R ${MAIL_HOSTNAME:=mail}:25
-
-cd /root/pool
-exec ./venv/bin/python -m pool.pool_server --log-file /data/pool_log/stdout -c /data/config.yaml
+cd /root/api
+../venv/bin/python manage.py collectstatic --no-input
+../venv/bin/python manage.py migrate
+exec ../venv/bin/daphne --port 8000 openchiaapi.asgi:application
