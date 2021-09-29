@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import Block, Launcher, Partial, Payout, PayoutAddress
-from referral.models import Referral
 
 
 class LauncherSerializer(serializers.HyperlinkedModelSerializer):
@@ -28,7 +27,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             ret['email'] = instance.email
             ret['notify_missing_partials_hours'] = instance.notify_missing_partials_hours
             try:
-                referral = instance.referral_set.filter(active=True)[0]
+                ret['referrer'] = instance.referral_set.filter(active=True)[0].referrer_id
             except IndexError:
                 ret['referrer'] = None
         return ret

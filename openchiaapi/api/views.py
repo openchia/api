@@ -223,6 +223,18 @@ class LoginView(APIView):
         return Response(True)
 
 
+class LoggedInView(APIView):
+    """
+    Get the logged in launcher id.
+    """
+
+    @swagger_auto_schema(response_body=LoginSerializer)
+    def get(self, request):
+        return Response({
+            'launcher_id': request.session.get('launcher_id'),
+        })
+
+
 class PartialViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Partial.objects.all()
     serializer_class = PartialSerializer
