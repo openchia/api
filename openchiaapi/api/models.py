@@ -78,6 +78,7 @@ class Payout(models.Model):
     datetime = models.DateTimeField(default=timezone.now)
     amount = models.BigIntegerField()
     fee = models.BigIntegerField(default=0)
+    referral = models.BigIntegerField(default=0)
 
 
 class PayoutAddress(models.Model):
@@ -90,6 +91,8 @@ class PayoutAddress(models.Model):
     pool_puzzle_hash = models.CharField(max_length=64, default='')
     launcher = models.ForeignKey(Launcher, on_delete=models.SET_NULL, null=True, default=None)
     amount = models.BigIntegerField()
+    referral = models.ForeignKey('referral.Referral', null=True, default=None, on_delete=models.SET_NULL)
+    referral_amount = models.BigIntegerField(default=0)
     transaction = models.CharField(max_length=100, null=True)
     confirmed_block_index = models.IntegerField(null=True, default=None)
 
