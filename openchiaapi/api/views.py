@@ -15,7 +15,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as django_filters
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import filters, mixins, viewsets
+from rest_framework import filters, mixins, serializers, viewsets
 from rest_framework.exceptions import NotAuthenticated, NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -36,6 +36,7 @@ from .serializers import (
 from .utils import (
     get_pool_info, estimated_time_to_win,
 )
+from referral.utils import update_referral
 
 
 def get_pool_target_address():
@@ -98,6 +99,12 @@ class LauncherViewSet(
             launcher.email = s.validated_data['email']
         if 'notify_missing_partials_hours' in s.validated_data:
             launcher.notify_missing_partials_hours = s.validated_data['notify_missing_partials_hours']
+
+        try:
+            update_referral(launcher, s.validated_data.get('referrer') or None)
+        except ValueError as e:
+            raise serializers.ValidationError({'referrer': str(e)})
+
         launcher.save()
         return Response(s.validated_data)
 
@@ -187,7 +194,7 @@ class LoginView(APIView):
 
         launcher_id = hexstr_to_bytes(s.validated_data["launcher_id"])
         authentication_token = uint64(s.validated_data["authentication_token"])
-        if not validate_authentication_token(authentication_token, 5):
+        if not validate_authentication_token(authentication_token, 10):
             raise NotAuthenticated(detail='Invalid authentication_token')
 
         launcher = Launcher.objects.filter(launcher_id=s.validated_data["launcher_id"])
