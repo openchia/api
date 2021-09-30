@@ -32,7 +32,7 @@ def update_referral(launcher, referrer):
         if referrals.exists():
             referrals.update(active=False)
 
-        ref = Referral.objects.filter(referrer=ref_launcher)
+        ref = Referral.objects.filter(launcher=launcher, referrer=ref_launcher)
         if ref.exists():
             ref.update(active=True)
         else:
