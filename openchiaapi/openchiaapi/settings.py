@@ -20,9 +20,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = django_settings.get('secret_key') or 'django-insecure'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = django_settings.get('debug', True)
 
-ALLOWED_HOSTS = ['dev.openchia.io', 'openchia.io', 'www.openchia.io', 'localhost']
+ALLOWED_HOSTS = django_settings.get('allowed_hosts') or ['localhost']
 
 # Application definition
 
