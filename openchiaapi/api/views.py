@@ -1,4 +1,5 @@
 import os
+import time
 import yaml
 
 from blspy import AugSchemeMPL, G1Element, G2Element
@@ -125,6 +126,10 @@ class StatsView(APIView):
         minutes_to_win = estimated_time_to_win(
             size, int(globalinfo.blockchain_space), globalinfo.blockchain_avg_block_time,
         )
+        if coinrecord.exists():
+            time_since_last_win = int(time.time() - coinrecord[0].timestamp)
+        else:
+            time_since_last_win = None
         pi = StatsSerializer(data={
             'fee': Decimal(pool_info['fee']),
             'farmers': farmers,
@@ -132,6 +137,7 @@ class StatsView(APIView):
             'rewards_blocks': coinrecord.count(),
             'pool_space': size,
             'estimate_win': minutes_to_win,
+            'time_since_last_win': time_since_last_win,
             'blockchain_height': globalinfo.blockchain_height,
             'blockchain_space': int(globalinfo.blockchain_space),
             'reward_system': 'PPLNS',

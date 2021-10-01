@@ -85,6 +85,7 @@ class StatsSerializer(serializers.Serializer):
     blockchain_space = serializers.IntegerField()
     fee = serializers.DecimalField(max_digits=3, decimal_places=2)
     estimate_win = serializers.IntegerField()
+    time_since_last_win = serializers.IntegerField()
     rewards_amount = serializers.DecimalField(max_digits=10, decimal_places=5)
     rewards_blocks = serializers.IntegerField()
     last_rewards = serializers.ListField(
