@@ -70,7 +70,7 @@ class LauncherViewSet(
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['difficulty', 'launcher_id', 'name', 'is_pool_member']
     search_fields = ['launcher_id', 'name']
-    ordering_fields = ['points', 'difficulty']
+    ordering_fields = ['points', 'points_pplns', 'difficulty']
     ordering = ['-points']
 
     def get_serializer_context(self):
