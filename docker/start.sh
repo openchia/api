@@ -8,4 +8,4 @@ export POOL_LOG_PATH="/data/pool_log/stdout"
 cd /root/api
 ../venv/bin/python manage.py collectstatic --no-input
 ../venv/bin/python manage.py migrate
-exec ../venv/bin/daphne --port 8000 openchiaapi.asgi:application
+exec ../venv/bin/daphne --bind 0.0.0.0 --port 8000 openchiaapi.asgi:application
