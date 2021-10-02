@@ -71,6 +71,7 @@ class PayoutSerializer(serializers.HyperlinkedModelSerializer):
 
 class PayoutAddressSerializer(serializers.HyperlinkedModelSerializer):
     launcher = LauncherSerializer()
+    payout = PayoutSerializer()
 
     class Meta:
         model = PayoutAddress
