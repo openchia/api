@@ -166,7 +166,7 @@ class XCHScanStatsView(APIView):
         pi = XCHScanStatsSerializer(data={
             'poolInfo': {
                 'puzzle_hash': '0x' + decode_puzzle_hash(POOL_TARGET_ADDRESS).hex(),
-                'fee': Decimal(pool_info['fee'] * 100),
+                'fee': Decimal(pool_info['fee']) * 100,
                 'minPay': 0,
             },
             'farmers': farmers,
