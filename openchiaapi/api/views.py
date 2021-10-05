@@ -68,7 +68,7 @@ class LauncherViewSet(
 ):
     queryset = Launcher.objects.all()
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['difficulty', 'launcher_id', 'name', 'is_pool_member']
+    filterset_fields = ['difficulty', 'launcher_id', 'name', 'is_pool_member', 'points_pplns']
     search_fields = ['launcher_id', 'name']
     ordering_fields = ['points', 'points_pplns', 'difficulty']
     ordering = ['-points']
