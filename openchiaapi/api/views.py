@@ -60,6 +60,16 @@ class BlockViewSet(viewsets.ReadOnlyModelViewSet):
     ordering = ['-confirmed_block_index']
 
 
+class LauncherFilter(django_filters.FilterSet):
+    points__gt = django_filters.NumberFilter(field_name='points', lookup_expr='gt')
+    points_pplns__gt = django_filters.NumberFilter(field_name='points_pplns', lookup_expr='gt')
+    share_pplns__gt = django_filters.NumberFilter(field_name='share_pplns', lookup_expr='gt')
+
+    class Meta:
+        model = Launcher
+        fields = ['points', 'points_pplns', 'share_pplns']
+
+
 class LauncherViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -68,6 +78,7 @@ class LauncherViewSet(
 ):
     queryset = Launcher.objects.all()
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = LauncherFilter
     filterset_fields = ['difficulty', 'launcher_id', 'name', 'is_pool_member', 'points_pplns']
     search_fields = ['launcher_id', 'name']
     ordering_fields = ['points', 'points_pplns', 'difficulty']
