@@ -67,7 +67,10 @@ class LauncherFilter(django_filters.FilterSet):
 
     class Meta:
         model = Launcher
-        fields = ['points', 'points_pplns', 'share_pplns']
+        fields = [
+            'points', 'points_pplns', 'share_pplns', 'is_pool_member', 'name', 'launcher_id',
+            'difficulty',
+        ]
 
 
 class LauncherViewSet(
