@@ -133,3 +133,4 @@ class GlobalInfo(SingletonModel):
     blockchain_space = models.CharField(default='0', max_length=128)
     blockchain_avg_block_time = models.BigIntegerField(default=0, null=True)
     xch_current_price = models.JSONField(default=dict)
+    wallets = models.JSONField(default=dict)
