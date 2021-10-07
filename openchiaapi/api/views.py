@@ -157,6 +157,7 @@ class StatsView(APIView):
                 'height': i.confirmed_block_index,
             } for i in coinrecord[:10]],
             'xch_current_price': globalinfo.xch_current_price,
+            'pool_wallets': globalinfo.wallets,
         })
         pi.is_valid()
         return Response(pi.data)
