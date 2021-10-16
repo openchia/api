@@ -168,9 +168,9 @@ class StatsView(APIView):
             } for i in block[:10]],
             'xch_current_price': globalinfo.xch_current_price,
             'pool_wallets': globalinfo.wallets,
-            'average_effort': block.filter(~Q(luck=-1)).aggregate(
-                total=Avg('luck')
-            )['total'],
+            'average_effort': block.filter(
+                ~Q(luck=-1), timestamp__gte=time.time() - days30
+            ).aggregate(total=Avg('luck'))['total'],
             'xch_tb_month': profitability,
         })
         pi.is_valid()
