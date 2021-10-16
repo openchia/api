@@ -11,7 +11,7 @@ from chia.util.hash import std_hash
 from chia.util.ints import uint64
 from datetime import datetime, timedelta
 from decimal import Decimal
-from django.db.models import Sum
+from django.db.models import Avg, Sum, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as django_filters
 from drf_yasg import openapi
@@ -128,7 +128,7 @@ class StatsView(APIView):
 
     @swagger_auto_schema(responses={200: StatsSerializer(many=False)})
     def get(self, request, format=None):
-        coinrecord = Block.objects.order_by('-confirmed_block_index')
+        block = Block.objects.order_by('-confirmed_block_index')
         farmers = Launcher.objects.filter(is_pool_member=True).count()
         pool_info = get_pool_info()
         try:
@@ -140,15 +140,22 @@ class StatsView(APIView):
         minutes_to_win = estimated_time_to_win(
             size, int(globalinfo.blockchain_space), globalinfo.blockchain_avg_block_time,
         )
-        if coinrecord.exists():
-            time_since_last_win = int(time.time() - coinrecord[0].timestamp)
+        if block.exists():
+            time_since_last_win = int(time.time() - block[0].timestamp)
         else:
             time_since_last_win = None
+
+        profitability = 0
+        days30 = 30 * 24 * 60 * 60
+        for b in block.filter(timestamp__gte=time.time() - days30):
+            profitability += (b.amount / 1000000000000) / (b.pool_space / 1099511627776)
+        profitability /= 30
+
         pi = StatsSerializer(data={
             'fee': Decimal(pool_info['fee']),
             'farmers': farmers,
-            'rewards_amount': coinrecord.aggregate(total=Sum('amount'))['total'],
-            'rewards_blocks': coinrecord.count(),
+            'rewards_amount': block.aggregate(total=Sum('amount'))['total'],
+            'rewards_blocks': block.count(),
             'pool_space': size,
             'estimate_win': minutes_to_win,
             'time_since_last_win': time_since_last_win,
@@ -158,9 +165,13 @@ class StatsView(APIView):
             'last_rewards': [{
                 'date': datetime.utcfromtimestamp(i.timestamp),
                 'height': i.confirmed_block_index,
-            } for i in coinrecord[:10]],
+            } for i in block[:10]],
             'xch_current_price': globalinfo.xch_current_price,
             'pool_wallets': globalinfo.wallets,
+            'average_effort': block.filter(~Q(luck=-1)).aggregate(
+                total=Avg('luck')
+            )['total'],
+            'xch_tb_month': profitability,
         })
         pi.is_valid()
         return Response(pi.data)
@@ -170,7 +181,7 @@ class XCHScanStatsView(APIView):
 
     @swagger_auto_schema(responses={200: XCHScanStatsSerializer(many=False)})
     def get(self, request, format=None):
-        coinrecord = Block.objects.order_by('-confirmed_block_index')
+        block = Block.objects.order_by('-confirmed_block_index')
         farmers = Launcher.objects.filter(is_pool_member=True).count()
         pool_info = get_pool_info()
         try:
@@ -189,7 +200,7 @@ class XCHScanStatsView(APIView):
             'farmedBlocks': [{
                 'time': i.timestamp,
                 'height': i.confirmed_block_index,
-            } for i in coinrecord[:10]],
+            } for i in block[:10]],
         })
         pi.is_valid()
         return Response(pi.data)
