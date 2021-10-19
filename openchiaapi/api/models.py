@@ -14,6 +14,7 @@ class Block(models.Model):
     confirmed_block_index = models.BigIntegerField()
     puzzle_hash = models.CharField(max_length=64)
     amount = models.BigIntegerField()
+    absorb_fee = models.IntegerField(default=0)
     farmed_by = models.ForeignKey('api.Launcher', on_delete=models.SET_NULL, null=True)
     pool_space = models.BigIntegerField(default=0)
     estimate_to_win = models.BigIntegerField(default=-1)
