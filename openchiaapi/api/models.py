@@ -10,7 +10,7 @@ class Block(models.Model):
     name = models.CharField(max_length=64)
     singleton = models.CharField(max_length=64)
     timestamp = models.BigIntegerField()
-    farmed_height = models.BigIntegerField()
+    farmed_height = models.BigIntegerField(unique=True)
     confirmed_block_index = models.BigIntegerField()
     puzzle_hash = models.CharField(max_length=64)
     amount = models.BigIntegerField()
