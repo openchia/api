@@ -56,8 +56,8 @@ class BlockViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Block.objects.all()
     serializer_class = BlockSerializer
     filterset_fields = ['farmed_by', 'payout']
-    ordering_fields = ['confirmed_block_index', 'payout']
-    ordering = ['-confirmed_block_index']
+    ordering_fields = ['confirmed_block_index', 'farmed_height', 'payout']
+    ordering = ['-farmed_height']
 
 
 class LauncherFilter(django_filters.FilterSet):
