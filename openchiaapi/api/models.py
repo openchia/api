@@ -50,6 +50,18 @@ class Launcher(models.Model):
     notify_missing_partials_hours = models.IntegerField(default=1, null=True)
 
 
+class Singleton(models.Model):
+
+    class Meta:
+        db_table = 'singleton'
+
+    launcher = models.ForeignKey(Launcher, on_delete=models.CASCADE)
+    singleton_name = models.CharField(max_length=64)
+    singleton_tip = models.BinaryField()
+    singleton_tip_state = models.BinaryField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class Partial(models.Model):
 
     class Meta:
