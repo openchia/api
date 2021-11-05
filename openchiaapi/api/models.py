@@ -95,6 +95,15 @@ class Payout(models.Model):
     referral = models.BigIntegerField(default=0)
 
 
+class CoinReward(models.Model):
+
+    class Meta:
+        db_table = 'coin_reward'
+
+    name = models.CharField(max_length=64, primary_key=True)
+    payout = models.ForeignKey(Payout, on_delete=models.CASCADE)
+
+
 class PayoutAddress(models.Model):
 
     class Meta:
