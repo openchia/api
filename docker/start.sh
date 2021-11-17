@@ -10,7 +10,7 @@ cd /root/api
 ../venv/bin/python manage.py migrate
 
 echo "PATH=/bin:/sbin:/usr/sbin:/usr/bin" > /etc/cron.d/giveaway
-echo "POOL_CONFIG_PATH=${POOL_CONFIG_PATH}" > /etc/cron.d/giveaway
+echo "POOL_CONFIG_PATH=${POOL_CONFIG_PATH}" >> /etc/cron.d/giveaway
 echo "0 0 * * * root cd /root/api && (../venv/bin/python manage.py giveaway_new || true) && ../venv/bin/python manage.py giveaway_round >> /var/log/cron.log 2>&1" >> /etc/cron.d/giveaway
 
 cron
