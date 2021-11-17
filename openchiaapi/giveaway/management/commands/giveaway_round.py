@@ -32,8 +32,23 @@ class Command(BaseCommand):
 
         with transaction.atomic():
             for launcher in Launcher.objects.filter(is_pool_member=True):
-                # Each launcher can have at maximum 100 tickets per round
-                num_tickets = min(100, math.floor(launcher.estimated_size / 1024 / 1024 / 1024))
+                size_tib = launcher.estimated_size / 1024 ** 4
+                num_tickets = 0
+                # Tiering tickets
+                # 0-100 TiB gets 1 ticket per 1 TiB
+                # 100-200 TiB gets 1 ticket per 2 TiB
+                # 200-500 TiB gets 1 ticket per 5 TiB
+                # 500-1000 TiB gets 1 ticket per 10 TiB
+                # 1000+ TiB gets 1 ticket per 20 TiB
+                for start, end, per_tib in (
+                    (0, 100, 1),
+                    (100, 200, 2),
+                    (200, 500, 5),
+                    (500, 1000, 10),
+                    (1000, 1000000, 20),  # 1000000 == infinite
+                ):
+                    if size_tib - start > 0:
+                        num_tickets += math.floor(min(size_tib - start, end - start) / per_tib)
                 tickets = []
                 for _ in range(num_tickets):
                     tickets.append(
