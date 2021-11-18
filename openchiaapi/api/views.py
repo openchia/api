@@ -262,7 +262,7 @@ class LoginView(APIView):
         request.session['launcher_id'] = s.validated_data['launcher_id']
         m = hashlib.sha256()
         for v in s.validated_data.values():
-            m.update(v.encode())
+            m.update(str(v).encode())
         launcher.qrcode_token = m.hexdigest()
         launcher.save()
         return Response(True)
