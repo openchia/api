@@ -48,6 +48,7 @@ class Launcher(models.Model):
     left_at = models.DateTimeField(default=None, null=True)
     email = models.EmailField(default=None, null=True)
     notify_missing_partials_hours = models.IntegerField(default=1, null=True)
+    fcm_token = models.CharField(max_length=500, default=None, null=True)
 
 
 class Singleton(models.Model):

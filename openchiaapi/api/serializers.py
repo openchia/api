@@ -26,6 +26,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
         if self.context['request'].session.get('launcher_id') == ret['launcher_id']:
             ret['email'] = instance.email
             ret['notify_missing_partials_hours'] = instance.notify_missing_partials_hours
+            ret['fcm_token'] = instance.fcm_token
             try:
                 ret['referrer'] = instance.referral_set.filter(active=True)[0].referrer_id
             except IndexError:
@@ -38,6 +39,7 @@ class LauncherUpdateSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, allow_null=True)
     notify_missing_partials_hours = serializers.CharField(required=False, allow_null=True)
     referrer = serializers.CharField(required=False, allow_null=True)
+    fcm_token = serializers.CharField(required=False, allow_null=True)
 
 
 class BlockSerializer(serializers.HyperlinkedModelSerializer):
