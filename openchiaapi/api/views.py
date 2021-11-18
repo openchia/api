@@ -1,5 +1,8 @@
+import io
 import os
 import time
+import qrcode
+import qrcode.image.svg
 import yaml
 
 from blspy import AugSchemeMPL, G1Element, G2Element
@@ -19,6 +22,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, mixins, serializers, viewsets
 from rest_framework.exceptions import NotAuthenticated, NotFound
 from rest_framework.views import APIView
+from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 
 from .models import Block, GlobalInfo, Launcher, Partial, Payout, PayoutAddress, Space
@@ -254,7 +258,43 @@ class LoginView(APIView):
                 detail=f"Failed to verify signature {signature} for launcher_id {launcher_id.hex()}."
             )
         request.session['launcher_id'] = s.validated_data['launcher_id']
+        request.session['launcher_login_data'] = s.validated_data
         return Response(True)
+
+
+class SVGRenderer(BaseRenderer):
+    media_type = 'image/svg+xml'
+    format = 'svg'
+    charset = None
+    render_style = 'binary'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        return data
+
+
+class QRCodeView(APIView):
+    """
+    QR Code for the farmer.
+    """
+
+    renderer_classes = [SVGRenderer]
+
+    def get(self, request):
+        login_data = request.session.get('launcher_login_data')
+        if not login_data:
+            raise NotAuthenticated(
+                detail='Not authenticated',
+            )
+        factory = qrcode.image.svg.SvgPathImage
+        img = qrcode.make(
+            '&'.join([f'{k}={v}' for k, v in login_data.items()]),
+            image_factory=factory,
+        )
+        stream = io.BytesIO()
+        img.save(stream)
+        img = stream.getvalue()
+        stream.close()
+        return Response(img, content_type='application/svg')
 
 
 class LoggedInView(APIView):
