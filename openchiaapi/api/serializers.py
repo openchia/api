@@ -56,6 +56,10 @@ class LoginSerializer(serializers.Serializer):
     signature = serializers.CharField()
 
 
+class LoginQRSerializer(serializers.Serializer):
+    token = serializers.CharField(required=True)
+
+
 class PartialSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Partial

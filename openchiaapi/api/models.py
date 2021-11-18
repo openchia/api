@@ -49,6 +49,7 @@ class Launcher(models.Model):
     email = models.EmailField(default=None, null=True)
     notify_missing_partials_hours = models.IntegerField(default=1, null=True)
     fcm_token = models.CharField(max_length=500, default=None, null=True)
+    qrcode_token = models.CharField(max_length=64, default=None, null=True, db_index=True)
 
 
 class Singleton(models.Model):

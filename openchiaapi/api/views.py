@@ -1,3 +1,4 @@
+import hashlib
 import io
 import os
 import time
@@ -31,6 +32,7 @@ from .serializers import (
     LauncherSerializer,
     LauncherUpdateSerializer,
     LoginSerializer,
+    LoginQRSerializer,
     PartialSerializer,
     PayoutSerializer,
     PayoutAddressSerializer,
@@ -258,7 +260,30 @@ class LoginView(APIView):
                 detail=f"Failed to verify signature {signature} for launcher_id {launcher_id.hex()}."
             )
         request.session['launcher_id'] = s.validated_data['launcher_id']
-        request.session['launcher_login_data'] = s.validated_data
+        m = hashlib.sha256()
+        for v in s.validated_data.values():
+            m.update(v.encode())
+        launcher.qrcode_token = m.hexdigest()
+        launcher.save()
+        return Response(True)
+
+
+class LoginQRView(APIView):
+    """
+    Login using QR Code token
+    """
+
+    @swagger_auto_schema(request_body=LoginQRSerializer)
+    def post(self, request):
+        s = LoginQRSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+
+        launcher = Launcher.objects.filter(qrcode_token=s.validated_data["token"])
+        if not launcher.exists():
+            raise NotAuthenticated(detail='Invalid token')
+        launcher = launcher[0]
+
+        request.session['launcher_id'] = launcher.launcher_id
         return Response(True)
 
 
@@ -280,14 +305,18 @@ class QRCodeView(APIView):
     renderer_classes = [SVGRenderer]
 
     def get(self, request):
-        login_data = request.session.get('launcher_login_data')
-        if not login_data:
-            raise NotAuthenticated(
-                detail='Not authenticated',
-            )
+        launcher_id = request.session.get('launcher_id')
+        if not launcher_id:
+            raise NotAuthenticated(detail='Not authenticated')
+
+        launcher = Launcher.objects.filter(launcher_id=launcher_id)
+        if not launcher:
+            raise NotAuthenticated(detail='Not authenticated')
+        launcher = launcher[0]
+
         factory = qrcode.image.svg.SvgPathImage
         img = qrcode.make(
-            '&'.join([f'{k}={v}' for k, v in login_data.items()]),
+            launcher.qrcode_token,
             image_factory=factory,
         )
         stream = io.BytesIO()
