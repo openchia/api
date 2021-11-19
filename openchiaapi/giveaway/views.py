@@ -27,7 +27,7 @@ class TicketsViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ClosestTicketView(APIView):
 
-    @swagger_auto_schema(request_body=ClosestTicketSerializer)
+    @swagger_auto_schema(query_serializer=ClosestTicketSerializer)
     def get(self, request):
         ticket = ClosestTicketSerializer(data=request.GET)
         ticket.is_valid(raise_exception=True)

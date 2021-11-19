@@ -107,6 +107,9 @@ class LauncherViewSet(
 
     def update(self, request, pk):
         launcher_id = request.session.get('launcher_id')
+        if not launcher_id and request.auth:
+            launcher_id = request.auth.launcher_id
+
         if not launcher_id or launcher_id != pk:
             raise NotAuthenticated()
         launcher = Launcher.objects.filter(launcher_id=pk)
@@ -115,7 +118,8 @@ class LauncherViewSet(
         launcher = launcher[0]
         s = LauncherUpdateSerializer(data=request.data)
         s.is_valid(raise_exception=True)
-        launcher.name = s.validated_data['name']
+        if 'name' in s.validated_data:
+            launcher.name = s.validated_data['name']
         if 'email' in s.validated_data:
             launcher.email = s.validated_data['email']
         if 'notify_missing_partials_hours' in s.validated_data:

@@ -23,7 +23,9 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        if self.context['request'].session.get('launcher_id') == ret['launcher_id']:
+        if (self.context['request'].auth and
+                self.context['request'].auth.launcher_id == ret['launcher_id']) or \
+                self.context['request'].session.get('launcher_id') == ret['launcher_id']:
             ret['email'] = instance.email
             ret['notify_missing_partials_hours'] = instance.notify_missing_partials_hours
             ret['fcm_token'] = instance.fcm_token
@@ -35,7 +37,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class LauncherUpdateSerializer(serializers.Serializer):
-    name = serializers.CharField(required=True)
+    name = serializers.CharField(required=False)
     email = serializers.EmailField(required=False, allow_null=True)
     notify_missing_partials_hours = serializers.CharField(required=False, allow_null=True)
     referrer = serializers.CharField(required=False, allow_null=True)
