@@ -327,7 +327,7 @@ class QRCodeView(APIView):
         img.save(stream)
         img = stream.getvalue()
         stream.close()
-        return Response(img, content_type='application/svg')
+        return Response(img, content_type='image/svg+xml')
 
 
 class LoggedInView(APIView):
