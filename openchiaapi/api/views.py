@@ -288,7 +288,10 @@ class LoginQRView(APIView):
         launcher = launcher[0]
 
         request.session['launcher_id'] = launcher.launcher_id
-        return Response({'launcher_id': launcher.launcher_id})
+        return Response({
+            'launcher_id': launcher.launcher_id,
+            'name': launcher.name,
+        })
 
 
 class SVGRenderer(BaseRenderer):
