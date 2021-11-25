@@ -30,3 +30,16 @@ class TicketsRoundSerializer(serializers.HyperlinkedModelSerializer):
 class ClosestTicketSerializer(serializers.Serializer):
     giveaway = serializers.IntegerField()
     number = serializers.IntegerField()
+
+
+class ClosestWinnerSerializer(serializers.Serializer):
+    giveaway = serializers.IntegerField()
+    winner = serializers.CharField()
+    number = serializers.IntegerField()
+    password = serializers.CharField(style={'input_type': 'password'})
+
+    def __init__(self, *args, **kwargs):
+        if 'context' in kwargs:
+            request = kwargs['context']['request']
+            kwargs['data'] = request.query_params
+        super().__init__(*args, **kwargs)

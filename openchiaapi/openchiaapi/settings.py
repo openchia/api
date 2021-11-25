@@ -1,13 +1,8 @@
-import os
-import yaml
 from pathlib import Path
+from openchiaapi.utils import custom_settings
 
 
-django_settings = os.environ.get('DJANGO_SETTINGS_FILE')
-if django_settings and os.path.exists(django_settings):
-    with open(django_settings, 'r') as f:
-        django_settings = yaml.safe_load(f)
-django_settings = django_settings or {}
+django_settings = custom_settings()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
