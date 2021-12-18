@@ -50,6 +50,9 @@ class Launcher(models.Model):
     notify_missing_partials_hours = models.IntegerField(default=1, null=True)
     fcm_token = models.CharField(max_length=500, default=None, null=True)
     qrcode_token = models.CharField(max_length=64, default=None, null=True, db_index=True)
+    push_missing_partials_hours = models.IntegerField(null=True, default=None)
+    push_failed_partials_percent = models.IntegerField(null=True, default=None)
+    push_payment = models.BooleanField(default=False)
 
 
 class Singleton(models.Model):

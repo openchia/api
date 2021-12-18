@@ -264,11 +264,12 @@ class LoginView(APIView):
                 detail=f"Failed to verify signature {signature} for launcher_id {launcher_id.hex()}."
             )
         request.session['launcher_id'] = s.validated_data['launcher_id']
-        m = hashlib.sha256()
-        for v in s.validated_data.values():
-            m.update(str(v).encode())
-        launcher.qrcode_token = m.hexdigest()
-        launcher.save()
+        if not launcher.qrcode_token:
+            m = hashlib.sha256()
+            for v in s.validated_data.values():
+                m.update(str(v).encode())
+            launcher.qrcode_token = m.hexdigest()
+            launcher.save()
         return Response(True)
 
 
