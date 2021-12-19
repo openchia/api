@@ -29,6 +29,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             ret['email'] = instance.email
             ret['notify_missing_partials_hours'] = instance.notify_missing_partials_hours
             ret['push_missing_partials_hours'] = instance.push_missing_partials_hours
+            ret['push_block_farmed'] = instance.push_block_farmed
             ret['fcm_token'] = instance.fcm_token
             try:
                 ret['referrer'] = instance.referral_set.filter(active=True)[0].referrer_id
@@ -44,6 +45,7 @@ class LauncherUpdateSerializer(serializers.Serializer):
     referrer = serializers.CharField(required=False, allow_null=True)
     fcm_token = serializers.CharField(required=False, allow_null=True)
     push_missing_partials_hours = serializers.CharField(required=False, allow_null=True)
+    push_block_farmed = serializers.BooleanField(required=False)
 
 
 class BlockSerializer(serializers.HyperlinkedModelSerializer):

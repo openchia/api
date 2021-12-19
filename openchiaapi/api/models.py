@@ -53,6 +53,7 @@ class Launcher(models.Model):
     push_missing_partials_hours = models.IntegerField(null=True, default=None)
     push_failed_partials_percent = models.IntegerField(null=True, default=None)
     push_payment = models.BooleanField(default=False)
+    push_block_farmed = models.BooleanField(default=True)
 
 
 class Singleton(models.Model):

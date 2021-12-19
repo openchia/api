@@ -126,6 +126,8 @@ class LauncherViewSet(
             launcher.notify_missing_partials_hours = s.validated_data['notify_missing_partials_hours']
         if 'push_missing_partials_hours' in s.validated_data:
             launcher.push_missing_partials_hours = s.validated_data['push_missing_partials_hours']
+        if 'push_block_farmed' in s.validated_data:
+            launcher.push_block_farmed = s.validated_data['push_block_farmed']
         if 'fcm_token' in s.validated_data:
             launcher.fcm_token = s.validated_data['fcm_token']
 
