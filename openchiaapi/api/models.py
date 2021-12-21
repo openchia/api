@@ -22,6 +22,7 @@ class Block(models.Model):
     payout = models.ForeignKey(
         'Payout', related_name='blocks', on_delete=models.SET_NULL, null=True, default=None,
     )
+    xch_current_price = models.JSONField(default=None, null=True)
 
 
 class Launcher(models.Model):
@@ -110,6 +111,16 @@ class CoinReward(models.Model):
     payout = models.ForeignKey(Payout, on_delete=models.CASCADE)
 
 
+class Transaction(models.Model):
+
+    class Meta:
+        db_table = 'transaction'
+
+    transaction = models.CharField(max_length=64, unique=True)
+    xch_current_price = models.JSONField(default=None, null=True)
+    confirmed_block_index = models.IntegerField(null=True, default=None)
+
+
 class PayoutAddress(models.Model):
 
     class Meta:
@@ -125,8 +136,7 @@ class PayoutAddress(models.Model):
     amount = models.BigIntegerField()
     referral = models.ForeignKey('referral.Referral', null=True, default=None, on_delete=models.SET_NULL)
     referral_amount = models.BigIntegerField(default=0)
-    transaction = models.CharField(max_length=100, null=True)
-    confirmed_block_index = models.IntegerField(null=True, default=None)
+    transaction = models.ForeignKey(Transaction, null=True, on_delete=models.SET_NULL)
 
 
 class Space(models.Model):
