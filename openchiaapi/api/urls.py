@@ -12,6 +12,7 @@ from .views import (
     QRCodeView,
     StatsView,
     SpaceView,
+    TransactionViewSet,
     XCHScanStatsView,
 )
 from giveaway.views import ClosestTicketView, GiveawayViewSet, TicketsViewSet
@@ -23,6 +24,7 @@ router.register('launcher', LauncherViewSet)
 router.register('partial', PartialViewSet)
 router.register('payout', PayoutViewSet)
 router.register('payoutaddress', PayoutAddressViewSet)
+router.register('transaction', TransactionViewSet)
 
 router.register('giveaway/round', GiveawayViewSet)
 router.register('giveaway/tickets', TicketsViewSet)

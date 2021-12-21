@@ -26,7 +26,10 @@ from rest_framework.views import APIView
 from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 
-from .models import Block, GlobalInfo, Launcher, Partial, Payout, PayoutAddress, Space
+from .models import (
+    Block, GlobalInfo, Launcher, Partial, Payout, PayoutAddress, Space,
+    Transaction,
+)
 from .serializers import (
     BlockSerializer,
     LauncherSerializer,
@@ -38,6 +41,7 @@ from .serializers import (
     PayoutAddressSerializer,
     StatsSerializer,
     SpaceSerializer,
+    TransactionSerializer,
     XCHScanStatsSerializer,
 )
 from .utils import (
@@ -364,6 +368,11 @@ class PayoutViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PayoutSerializer
     ordering_fields = ['datetime']
     ordering = ['-datetime']
+
+
+class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
 
 
 class PayoutAddressViewSet(viewsets.ReadOnlyModelViewSet):
