@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Block, Launcher, Partial, Payout, PayoutAddress
+from .models import Block, Launcher, Partial, Payout, PayoutAddress, Transaction
 
 
 class LauncherSerializer(serializers.HyperlinkedModelSerializer):
@@ -81,15 +81,22 @@ class PayoutSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
+class TransactionSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Transaction
+        fields = '__all__'
+
+
 class PayoutAddressSerializer(serializers.HyperlinkedModelSerializer):
     launcher = LauncherSerializer()
     payout = PayoutSerializer()
+    transaction = TransactionSerializer()
 
     class Meta:
         model = PayoutAddress
         fields = (
             'id', 'payout', 'puzzle_hash', 'launcher', 'amount', 'transaction',
-            'confirmed_block_index',
         )
 
 
