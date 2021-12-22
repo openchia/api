@@ -22,7 +22,7 @@ class Block(models.Model):
     payout = models.ForeignKey(
         'Payout', related_name='blocks', on_delete=models.SET_NULL, null=True, default=None,
     )
-    xch_current_price = models.JSONField(default=None, null=True)
+    xch_price = models.JSONField(default=None, null=True)
 
 
 class Launcher(models.Model):
@@ -117,7 +117,7 @@ class Transaction(models.Model):
         db_table = 'transaction'
 
     transaction = models.CharField(max_length=64, unique=True)
-    xch_current_price = models.JSONField(default=None, null=True)
+    xch_price = models.JSONField(default=None, null=True)
     confirmed_block_index = models.IntegerField(null=True, default=None)
 
 
