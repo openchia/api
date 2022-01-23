@@ -149,7 +149,9 @@ class StatsView(APIView):
     @swagger_auto_schema(responses={200: StatsSerializer(many=False)})
     def get(self, request, format=None):
         block = Block.objects.order_by('-confirmed_block_index')
-        farmers = Launcher.objects.filter(is_pool_member=True).count()
+        farmers = Launcher.objects.filter(is_pool_member=True)
+        farmers_total = farmers.count()
+        farmers_active = farmers.filter(points_pplns__gt=0).count()
         pool_info = get_pool_info()
         try:
             size = Space.objects.latest('id').size
@@ -173,7 +175,8 @@ class StatsView(APIView):
 
         pi = StatsSerializer(data={
             'fee': Decimal(pool_info['fee']),
-            'farmers': farmers,
+            'farmers': farmers_total,
+            'farmers_active': farmers_active,
             'rewards_amount': block.aggregate(total=Sum('amount'))['total'],
             'rewards_blocks': block.count(),
             'pool_space': size,

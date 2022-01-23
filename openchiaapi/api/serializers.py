@@ -113,6 +113,7 @@ class StatsSerializer(serializers.Serializer):
     )
     pool_space = serializers.IntegerField()
     farmers = serializers.IntegerField()
+    farmers_active = serializers.IntegerField()
     reward_system = serializers.CharField()
     xch_current_price = serializers.JSONField()
     pool_wallets = serializers.JSONField()
