@@ -382,8 +382,8 @@ class PayoutAddressViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = PayoutAddress.objects.all()
     serializer_class = PayoutAddressSerializer
     filterset_fields = ['payout', 'puzzle_hash', 'launcher']
-    ordering_fields = ['payout', 'launcher', 'confirmed_block_index']
-    ordering = ['-payout']
+    ordering_fields = ['payout', 'launcher', 'confirmed_block_index', 'amount']
+    ordering = ['-payout', '-amount']
 
 
 class SpaceView(APIView):
