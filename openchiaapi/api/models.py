@@ -42,6 +42,29 @@ class Launcher(models.Model):
     points_pplns = models.BigIntegerField()
     share_pplns = models.DecimalField(max_digits=21, decimal_places=20)
     difficulty = models.BigIntegerField()
+    custom_difficulty = models.CharField(
+        verbose_name='Custom Difficulty',
+        help_text=(
+            'Set a custom difficulty for the launcher to send less or more partials depending '
+            'on preference'
+        ),
+        null=True,
+        max_length=10,
+        choices=(
+            ('LOWEST', 'Lowest'),
+            ('LOW', 'Low'),
+            ('MEDIUM', 'Medium'),
+            ('HIGH', 'High'),
+            ('HIGHEST', 'Highest'),
+        ),
+        default=None,
+    )
+    minimum_payout = models.BigIntegerField(
+        verbose_name='Minimum Payout',
+        help_text='Set a minimum value before sending out payout from rewards',
+        null=True,
+        default=None,
+    )
     payout_instructions = models.TextField()
     is_pool_member = models.BooleanField()
     estimated_size = models.BigIntegerField(default=0)

@@ -31,6 +31,8 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             ret['push_missing_partials_hours'] = instance.push_missing_partials_hours
             ret['push_block_farmed'] = instance.push_block_farmed
             ret['fcm_token'] = instance.fcm_token
+            ret['custom_difficulty'] = instance.custom_difficulty
+            ret['minimum_payout'] = instance.minimum_payout
             try:
                 ret['referrer'] = instance.referral_set.filter(active=True)[0].referrer_id
             except IndexError:
@@ -46,6 +48,14 @@ class LauncherUpdateSerializer(serializers.Serializer):
     fcm_token = serializers.CharField(required=False, allow_null=True)
     push_missing_partials_hours = serializers.CharField(required=False, allow_null=True)
     push_block_farmed = serializers.BooleanField(required=False)
+    custom_difficulty = serializers.ChoiceField(required=False, allow_null=True, choices=(
+        ('LOWEST', 'Lowest'),
+        ('LOW', 'Low'),
+        ('MEDIUM', 'Medium'),
+        ('HIGH', 'High'),
+        ('HIGHEST', 'Highest'),
+    ))
+    minimum_payout = serializers.IntegerField(required=False, allow_null=True)
 
 
 class BlockSerializer(serializers.HyperlinkedModelSerializer):
