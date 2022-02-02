@@ -1,9 +1,11 @@
+from django.db.models import Sum
 from rest_framework import serializers
 from .models import Block, Launcher, Partial, Payout, PayoutAddress, Transaction
 
 
 class LauncherSerializer(serializers.HyperlinkedModelSerializer):
     points_of_total = serializers.SerializerMethodField('get_points_of_total')
+    payout = serializers.SerializerMethodField('get_payout')
 
     class Meta:
         model = Launcher
@@ -14,12 +16,23 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'difficulty',
             'is_pool_member', 'points_of_total', 'estimated_size',
             'joined_at',
+            'payout',
         ]
 
     def get_points_of_total(self, instance):
         if not self.context.get('total_points'):
             return 0
         return (instance.points / self.context['total_points']) * 100
+
+    def get_payout(self, instance):
+        return {
+            'total_paid': instance.payoutaddress_set.exclude(
+                transaction__confirmed_block_index=None
+            ).aggregate(total_paid=Sum('amount'))['total_paid'] or 0,
+            'total_unpaid': instance.payoutaddress_set.filter(
+                transaction__confirmed_block_index=None
+            ).aggregate(total_unpaid=Sum('amount'))['total_unpaid'] or 0,
+        }
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
