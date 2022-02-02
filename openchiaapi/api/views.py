@@ -249,7 +249,14 @@ class LoginView(APIView):
 
         launcher_id = hexstr_to_bytes(s.validated_data["launcher_id"])
         authentication_token = uint64(s.validated_data["authentication_token"])
-        if not validate_authentication_token(authentication_token, 5):
+
+        # TODO: investigate
+        if 'testnet' in os.environ.get('CHIA_NETWORK', ''):
+            token_timeout = 10
+        else:
+            token_timeout = 5
+
+        if not validate_authentication_token(authentication_token, token_timeout):
             raise NotAuthenticated(detail='Invalid authentication_token')
 
         launcher = Launcher.objects.filter(launcher_id=s.validated_data["launcher_id"])
