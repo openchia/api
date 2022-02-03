@@ -122,18 +122,13 @@ class LauncherViewSet(
         launcher = launcher[0]
         s = LauncherUpdateSerializer(data=request.data)
         s.is_valid(raise_exception=True)
-        if 'name' in s.validated_data:
-            launcher.name = s.validated_data['name']
-        if 'email' in s.validated_data:
-            launcher.email = s.validated_data['email']
-        if 'notify_missing_partials_hours' in s.validated_data:
-            launcher.notify_missing_partials_hours = s.validated_data['notify_missing_partials_hours']
-        if 'push_missing_partials_hours' in s.validated_data:
-            launcher.push_missing_partials_hours = s.validated_data['push_missing_partials_hours']
-        if 'push_block_farmed' in s.validated_data:
-            launcher.push_block_farmed = s.validated_data['push_block_farmed']
-        if 'fcm_token' in s.validated_data:
-            launcher.fcm_token = s.validated_data['fcm_token']
+
+        for i in (
+            'name', 'email', 'notify_missing_partials_hours', 'push_missing_partials_hours',
+            'push_block_farmed', 'fcm_token', 'minimum_payout', 'custom_difficulty',
+        ):
+            if i in s.validated_data:
+                setattr(launcher, i, s.validated_data[i])
 
         try:
             update_referral(launcher, s.validated_data.get('referrer') or None)
