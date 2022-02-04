@@ -1,4 +1,4 @@
-from django.db.models import Sum
+from django.db.models import Count, Sum
 from rest_framework import serializers
 from .models import Block, Launcher, Partial, Payout, PayoutAddress, Transaction
 
@@ -32,6 +32,11 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'total_unpaid': instance.payoutaddress_set.filter(
                 transaction__confirmed_block_index=None
             ).aggregate(total_unpaid=Sum('amount'))['total_unpaid'] or 0,
+            'total_transactions': instance.payoutaddress_set.exclude(
+                transaction__confirmed_block_index=None
+            ).values('transaction__transaction').order_by('transaction__transaction').aggregate(
+                transactions=Count('transaction__transaction', distinct=True)
+            )['transactions']
         }
 
     def to_representation(self, instance):
