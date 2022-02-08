@@ -15,13 +15,14 @@ from chia.util.hash import std_hash
 from chia.util.ints import uint64
 from datetime import datetime, timedelta
 from decimal import Decimal
-from django.db.models import Avg, Sum, Q
+from django.db.models import Avg, F, Sum, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as django_filters
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, mixins, serializers, viewsets
 from rest_framework.exceptions import NotAuthenticated, NotFound
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.views import APIView
 from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
@@ -39,6 +40,7 @@ from .serializers import (
     PartialSerializer,
     PayoutSerializer,
     PayoutAddressSerializer,
+    PayoutTransactionSerializer,
     StatsSerializer,
     SpaceSerializer,
     TransactionSerializer,
@@ -386,6 +388,36 @@ class PayoutAddressViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ['payout', 'puzzle_hash', 'launcher']
     ordering_fields = ['payout', 'launcher', 'confirmed_block_index', 'amount']
     ordering = ['-payout', '-amount']
+
+
+class PayoutTransactionViewSet(APIView):
+    launcher = openapi.Parameter(
+        'launcher',
+        openapi.IN_QUERY,
+        type=openapi.TYPE_STRING,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[launcher],
+        responses={200: PayoutTransactionSerializer(many=True)}
+    )
+    def get(self, request, format=None):
+        paginator = LimitOffsetPagination()
+        launcher = request.GET.get('launcher')
+        payouts = PayoutAddress.objects.values(
+            'launcher',
+            confirmed_block_index=F('transaction__confirmed_block_index'),
+            created_at_time=F('transaction__created_at_time'),
+            transaction_name=F('transaction__transaction'),
+            xch_price=F('transaction__xch_price'),
+        ).order_by('-transaction', 'launcher').annotate(amount=Sum('amount'))
+        if launcher:
+            payouts = payouts.filter(launcher=launcher)
+        result_page = paginator.paginate_queryset(payouts, request)
+        serializer = PayoutTransactionSerializer(result_page, many=True, context={
+            'request': request,
+        })
+        return paginator.get_paginated_response(serializer.data)
 
 
 class SpaceView(APIView):

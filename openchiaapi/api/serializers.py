@@ -128,6 +128,15 @@ class PayoutAddressSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
+class PayoutTransactionSerializer(serializers.Serializer):
+    transaction_name = serializers.CharField()
+    created_at_time = serializers.CharField()
+    launcher = serializers.CharField()
+    amount = serializers.IntegerField()
+    confirmed_block_index = serializers.IntegerField()
+    xch_price = serializers.DictField()
+
+
 class StatsSerializer(serializers.Serializer):
     blockchain_height = serializers.IntegerField()
     blockchain_space = serializers.IntegerField()

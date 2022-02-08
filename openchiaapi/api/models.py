@@ -140,6 +140,7 @@ class Transaction(models.Model):
         db_table = 'transaction'
 
     transaction = models.CharField(max_length=64, unique=True)
+    created_at_time = models.DateTimeField(null=True)
     xch_price = models.JSONField(default=None, null=True)
     confirmed_block_index = models.IntegerField(null=True, default=None)
 

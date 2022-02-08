@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework import routers
 from .views import (
     BlockViewSet,
@@ -8,6 +8,7 @@ from .views import (
     LoggedInView,
     PartialViewSet,
     PayoutAddressViewSet,
+    PayoutTransactionViewSet,
     PayoutViewSet,
     QRCodeView,
     StatsView,
@@ -36,6 +37,7 @@ urlpatterns = [
     path('giveaway/closest', ClosestTicketView.as_view()),
     path('login', LoginView.as_view()),
     path('login_qr', LoginQRView.as_view()),
+    re_path(r'payouttransaction/?', PayoutTransactionViewSet.as_view()),
     path('qrcode', QRCodeView.as_view()),
     path('loggedin', LoggedInView.as_view()),
     path('stats', StatsView.as_view()),
