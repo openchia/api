@@ -1,3 +1,4 @@
+FROM caddy:2.4.6-alpine as caddyimage
 FROM debian:stable
 
 # Identify the maintainer of an image
@@ -9,6 +10,7 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt-get install python3-virtualenv libpq-dev git vim procps net-tools iputils-ping cron -y
 
 EXPOSE 8000
+EXPOSE 8001
 
 WORKDIR /root
 
@@ -19,5 +21,8 @@ RUN ./venv/bin/pip install -r requirements.txt
 COPY ./openchiaapi /root/api
 
 COPY ./docker/start.sh /root/
+
+COPY ./caddy/Caddyfile /etc/
+COPY --from=caddyimage /usr/bin/caddy /usr/bin/caddy
 
 CMD ["bash", "/root/start.sh"]

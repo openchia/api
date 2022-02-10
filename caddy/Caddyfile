@@ -1,0 +1,7 @@
+http://localhost:8001 {
+
+        root * /root/api
+
+        file_server /static/*
+
+}

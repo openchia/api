@@ -16,4 +16,6 @@ echo "0 0 * * * root cd /root/api && (../venv/bin/python manage.py giveaway_new 
 
 cron
 
+caddy start -config /etc/Caddyfile
+
 exec ../venv/bin/daphne --bind 0.0.0.0 --port 8000 openchiaapi.asgi:application
