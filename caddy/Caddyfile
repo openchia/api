@@ -1,4 +1,4 @@
-http://localhost:8001 {
+http://%%DOMAIN%%:8001 {
 
         root * /root/api
 
