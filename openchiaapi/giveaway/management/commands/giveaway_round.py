@@ -37,15 +37,15 @@ class Command(BaseCommand):
                 # Tiering tickets
                 # 0-100 TiB gets 1 ticket per 1 TiB
                 # 100-200 TiB gets 1 ticket per 2 TiB
-                # 200-500 TiB gets 1 ticket per 5 TiB
-                # 500-1000 TiB gets 1 ticket per 10 TiB
-                # 1000+ TiB gets 1 ticket per 20 TiB
+                # 200-500 TiB gets 1 ticket per 3 TiB
+                # 500-1000 TiB gets 1 ticket per 4 TiB
+                # 1000+ TiB gets 1 ticket per 5 TiB
                 for start, end, per_tib in (
                     (0, 100, 1),
                     (100, 200, 2),
-                    (200, 500, 5),
-                    (500, 1000, 10),
-                    (1000, 1000000, 20),  # 1000000 == infinite
+                    (200, 500, 3),
+                    (500, 1000, 4),
+                    (1000, 1000000, 5),  # 1000000 == infinite
                 ):
                     if size_tib - start > 0:
                         num_tickets += math.floor(min(size_tib - start, end - start) / per_tib)
