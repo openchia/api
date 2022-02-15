@@ -103,7 +103,7 @@ class Partial(models.Model):
     error = models.CharField(max_length=25, null=True, default=None)
     harvester_id = models.CharField(max_length=64, null=True, default=None)
     plot_id = models.CharField(max_length=128, null=True, default=None)
-    chia_version = models.CharField(max_length=10, null=True, default=None)
+    chia_version = models.CharField(max_length=20, null=True, default=None)
     remote = models.CharField(max_length=45, null=True, default=None)
     pool_host = models.CharField(max_length=35, null=True, default=None)
 

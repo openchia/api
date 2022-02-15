@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='partial',
             name='chia_version',
-            field=models.CharField(default=None, max_length=10, null=True),
+            field=models.CharField(default=None, max_length=20, null=True),
         ),
         migrations.AddField(
             model_name='partial',
