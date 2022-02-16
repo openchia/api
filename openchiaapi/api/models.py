@@ -114,7 +114,7 @@ class PendingPartial(models.Model):
         db_table = 'pending_partial'
 
     partial = models.JSONField(default=dict)
-    req_metadata = models.JSONField(default=dict)
+    req_metadata = models.JSONField(default=dict, null=True)
     time_received = models.BigIntegerField()
     points_received = models.IntegerField()
 
