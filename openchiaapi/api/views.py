@@ -470,7 +470,7 @@ class LauncherSizeView(APIView):
         query_api = client.query_api()
 
         days = self.request.query_params.get('days', 7)
-        every = days_to_every(days)
+        every = days_to_every(int(days))
 
         q = query_api.query(
             textwrap.dedent('''from(bucket: "openchia")
@@ -516,7 +516,7 @@ class PoolSizeView(APIView):
         query_api = client.query_api()
 
         days = self.request.query_params.get('days', 7)
-        every = days_to_every(days)
+        every = days_to_every(int(days))
 
         q = query_api.query(
             textwrap.dedent('''from(bucket: "openchia")
