@@ -33,3 +33,15 @@ def get_influxdb_client():
         verify_ssl=getattr(settings, 'INFLUXDB_VERIFY_SSL', False),
     )
     return client
+
+
+def days_to_every(days):
+    if days == 1:
+        every = '1m'
+    elif days <= 7:
+        every = '1h'
+    elif days <= 31:
+        every = '12h'
+    else:
+        every = '1d'
+    return every

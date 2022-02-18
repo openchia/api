@@ -49,6 +49,7 @@ from .serializers import (
     XCHScanStatsSerializer,
 )
 from .utils import (
+    days_to_every,
     get_influxdb_client,
     get_pool_info, estimated_time_to_win,
 )
@@ -446,6 +447,13 @@ class SpaceView(APIView):
 
 class LauncherSizeView(APIView):
 
+    days_param = openapi.Parameter(
+        'days',
+        openapi.IN_QUERY,
+        description=f'Number of days (default: 7)',
+        type=openapi.TYPE_INTEGER,
+    )
+
     launcher = openapi.Parameter(
         'launcher',
         openapi.IN_QUERY,
@@ -454,20 +462,28 @@ class LauncherSizeView(APIView):
     )
 
     @swagger_auto_schema(
-        manual_parameters=[launcher],
+        manual_parameters=[days_param, launcher],
         responses={200: TimeseriesSerializer(many=True)},
     )
     def get(self, request, format=None):
         client = get_influxdb_client()
         query_api = client.query_api()
+
+        days = self.request.query_params.get('days', 7)
+        every = days_to_every(days)
+
         q = query_api.query(
             textwrap.dedent('''from(bucket: "openchia")
-              |> range(start: -24h, stop: now())
+              |> range(start: duration(v: _days), stop: now())
               |> filter(fn: (r) => r["_measurement"] == "launcher_size")
               |> filter(fn: (r) => r["launcher"] == _launcher)
-              |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
+              |> aggregateWindow(every: duration(v: _every), fn: mean, createEmpty: false)
               |> yield(name: "mean")'''),
-            params={'_launcher': self.request.query_params['launcher']},
+            params={
+                '_days': f"-{days}d",
+                '_launcher': self.request.query_params['launcher'],
+                '_every': every,
+            },
         )
 
         result = []
@@ -484,19 +500,34 @@ class LauncherSizeView(APIView):
 
 class PoolSizeView(APIView):
 
+    days_param = openapi.Parameter(
+        'days',
+        openapi.IN_QUERY,
+        description=f'Number of days (default: 7)',
+        type=openapi.TYPE_INTEGER,
+    )
+
     @swagger_auto_schema(
-        manual_parameters=[],
+        manual_parameters=[days_param],
         responses={200: TimeseriesSerializer(many=True)},
     )
     def get(self, request, format=None):
         client = get_influxdb_client()
         query_api = client.query_api()
+
+        days = self.request.query_params.get('days', 7)
+        every = days_to_every(days)
+
         q = query_api.query(
             textwrap.dedent('''from(bucket: "openchia")
-              |> range(start: -24h, stop: now())
+              |> range(start: duration(v: _days), stop: now())
               |> filter(fn: (r) => r["_measurement"] == "pool_size")
-              |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
+              |> aggregateWindow(every: duration(v: _every), fn: mean, createEmpty: false)
               |> yield(name: "mean")'''),
+            params={
+                '_days': f"-{days}d",
+                '_every': every,
+            },
         )
 
         result = []
