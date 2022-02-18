@@ -170,3 +170,9 @@ class XCHScanStatsSerializer(serializers.Serializer):
     )
     capacityBytes = serializers.IntegerField()
     farmers = serializers.IntegerField()
+
+
+class TimeseriesSerializer(serializers.Serializer):
+    datetime = serializers.CharField(required=True)
+    field = serializers.IntegerField(required=True)
+    value = serializers.IntegerField(required=True)

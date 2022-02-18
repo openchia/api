@@ -2,6 +2,7 @@ from django.urls import include, path, re_path
 from rest_framework import routers
 from .views import (
     BlockViewSet,
+    LauncherSizeView,
     LauncherViewSet,
     LoginView,
     LoginQRView,
@@ -10,6 +11,7 @@ from .views import (
     PayoutAddressViewSet,
     PayoutTransactionViewSet,
     PayoutViewSet,
+    PoolSizeView,
     QRCodeView,
     StatsView,
     SpaceView,
@@ -35,6 +37,8 @@ app_name = 'api'
 urlpatterns = [
     path('', include(router.urls)),
     path('giveaway/closest', ClosestTicketView.as_view()),
+    re_path(r'launcher_size/?', LauncherSizeView.as_view()),
+    re_path(r'pool_size/?', PoolSizeView.as_view()),
     path('login', LoginView.as_view()),
     path('login_qr', LoginQRView.as_view()),
     re_path(r'payouttransaction/?', PayoutTransactionViewSet.as_view()),

@@ -10,3 +10,4 @@ pyinotify
 cachetools
 qrcode
 pytz
+influxdb_client==1.25.0

@@ -4,6 +4,7 @@ import os
 import time
 import qrcode
 import qrcode.image.svg
+import textwrap
 import yaml
 
 from blspy import AugSchemeMPL, G1Element, G2Element
@@ -43,10 +44,12 @@ from .serializers import (
     PayoutTransactionSerializer,
     StatsSerializer,
     SpaceSerializer,
+    TimeseriesSerializer,
     TransactionSerializer,
     XCHScanStatsSerializer,
 )
 from .utils import (
+    get_influxdb_client,
     get_pool_info, estimated_time_to_win,
 )
 from referral.utils import update_referral
@@ -439,3 +442,70 @@ class SpaceView(APIView):
             date__gte=datetime.now() - timedelta(days=int(days))
         ).order_by('date')
         return Response([{'date': i.date, 'size': i.size} for i in size])
+
+
+class LauncherSizeView(APIView):
+
+    launcher = openapi.Parameter(
+        'launcher',
+        openapi.IN_QUERY,
+        description='Launcher ID',
+        type=openapi.TYPE_STRING,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[launcher],
+        responses={200: TimeseriesSerializer(many=True)},
+    )
+    def get(self, request, format=None):
+        client = get_influxdb_client()
+        query_api = client.query_api()
+        q = query_api.query(
+            textwrap.dedent('''from(bucket: "openchia")
+              |> range(start: -24h, stop: now())
+              |> filter(fn: (r) => r["_measurement"] == "launcher_size")
+              |> filter(fn: (r) => r["launcher"] == _launcher)
+              |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
+              |> yield(name: "mean")'''),
+            params={'_launcher': self.request.query_params['launcher']},
+        )
+
+        result = []
+        for table in q:
+            for r in table.records:
+                result.append({
+                    'datetime': r['_time'],
+                    'field': r['_field'],
+                    'value': r['_value'],
+                })
+
+        return Response(result)
+
+
+class PoolSizeView(APIView):
+
+    @swagger_auto_schema(
+        manual_parameters=[],
+        responses={200: TimeseriesSerializer(many=True)},
+    )
+    def get(self, request, format=None):
+        client = get_influxdb_client()
+        query_api = client.query_api()
+        q = query_api.query(
+            textwrap.dedent('''from(bucket: "openchia")
+              |> range(start: -24h, stop: now())
+              |> filter(fn: (r) => r["_measurement"] == "pool_size")
+              |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
+              |> yield(name: "mean")'''),
+        )
+
+        result = []
+        for table in q:
+            for r in table.records:
+                result.append({
+                    'datetime': r['_time'],
+                    'field': r['_field'],
+                    'value': r['_value'],
+                })
+
+        return Response(result)

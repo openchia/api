@@ -115,6 +115,12 @@ else:
     }
 
 
+if 'influxdb' in django_settings:
+    INFLUXDB_URL = django_settings['influxdb']['url']
+    INFLUXDB_TOKEN = django_settings['influxdb']['token']
+    INFLUXDB_ORG = django_settings['influxdb']['org']
+
+
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 

@@ -4,6 +4,9 @@ import requests
 
 from django.conf import settings
 
+from influxdb_client import InfluxDBClient
+
+
 logger = logging.getLogger('utils')
 
 
@@ -19,3 +22,14 @@ def estimated_time_to_win(pool_size, blockchain_space, avg_block_time):
     proportion = pool_size / blockchain_space if blockchain_space else -1
     minutes = int((avg_block_time / 60) / proportion) if proportion else -1
     return minutes
+
+
+def get_influxdb_client():
+    client = InfluxDBClient(
+        url=settings.INFLUXDB_URL,
+        token=settings.INFLUXDB_TOKEN,
+        org=settings.INFLUXDB_ORG,
+        ssl=getattr(settings, 'INFLUXDB_SSL', False),
+        verify_ssl=getattr(settings, 'INFLUXDB_VERIFY_SSL', False),
+    )
+    return client
