@@ -1,5 +1,6 @@
 import datetime
 import logging
+import gc
 import math
 import random
 
@@ -13,8 +14,11 @@ logger = logging.getLogger('giveaway_round')
 
 def get_distributed_tickets(giveaway):
     tickets = set()
-    for tr in TicketsRound.objects.filter(giveaway=giveaway):
-        tickets.update(tr.tickets)
+    # Try to use values to save some memory
+    for tr in TicketsRound.objects.filter(giveaway=giveaway).values('tickets'):
+        tickets.update(tr['tickets'])
+        del tr
+    gc.collect()
     return tickets
 
 
@@ -31,7 +35,7 @@ class Command(BaseCommand):
         logger.error(f'{len(available_tickets)} available tickets')
 
         with transaction.atomic():
-            for launcher in Launcher.objects.filter(is_pool_member=True):
+            for i, launcher in enumerate(Launcher.objects.filter(is_pool_member=True)):
                 size_tib = launcher.estimated_size / 1024 ** 4
                 num_tickets = 0
                 # Tiering tickets
@@ -61,3 +65,5 @@ class Command(BaseCommand):
                     number_tickets=len(tickets),
                     tickets=sorted(tickets),
                 )
+                if i % 20 == 0:
+                    gc.collect()
