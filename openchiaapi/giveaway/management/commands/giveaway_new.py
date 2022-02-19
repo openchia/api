@@ -19,6 +19,6 @@ class Command(BaseCommand):
 
         Giveaway.objects.create(
             draw_datetime=next_draw,
-            total_tickets=10000000,  # 1 ticket per TiB = 10EiB room
+            total_tickets=1000000,  # 1 ticket per TiB = 1EiB room
             prize_amount=1 * (10 ** 12),  # mojos
         )
