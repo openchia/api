@@ -97,7 +97,7 @@ class LoginQRSerializer(serializers.Serializer):
 class PartialSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Partial
-        fields = '__all__'
+        exclude = ['remote']
 
 
 class PayoutSerializer(serializers.HyperlinkedModelSerializer):
