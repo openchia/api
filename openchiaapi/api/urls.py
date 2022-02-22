@@ -7,6 +7,7 @@ from .views import (
     LoginView,
     LoginQRView,
     LoggedInView,
+    NetspaceView,
     PartialViewSet,
     PayoutAddressViewSet,
     PayoutTransactionViewSet,
@@ -16,6 +17,7 @@ from .views import (
     StatsView,
     SpaceView,
     TransactionViewSet,
+    XCHPriceView,
     XCHScanStatsView,
 )
 from giveaway.views import ClosestTicketView, GiveawayViewSet, TicketsViewSet
@@ -39,6 +41,8 @@ urlpatterns = [
     path('giveaway/closest', ClosestTicketView.as_view()),
     re_path(r'launcher_size/?', LauncherSizeView.as_view()),
     re_path(r'pool_size/?', PoolSizeView.as_view()),
+    re_path(r'stats/netspace/?', NetspaceView.as_view()),
+    re_path(r'stats/xchprice/?', XCHPriceView.as_view()),
     path('login', LoginView.as_view()),
     path('login_qr', LoginQRView.as_view()),
     re_path(r'payouttransaction/?', PayoutTransactionViewSet.as_view()),
