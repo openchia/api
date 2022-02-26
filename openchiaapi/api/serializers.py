@@ -52,6 +52,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             ret['fcm_token'] = instance.fcm_token
             ret['custom_difficulty'] = instance.custom_difficulty
             ret['minimum_payout'] = instance.minimum_payout
+            ret['payout_instructions'] = instance.payout_instructions
             try:
                 notification = instance.notification
                 ret['size_drop'] = notification.size_drop
