@@ -16,6 +16,7 @@ from chia.util.hash import std_hash
 from chia.util.ints import uint64
 from datetime import datetime, timedelta
 from decimal import Decimal
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Avg, F, Sum, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as django_filters
@@ -30,6 +31,7 @@ from rest_framework.response import Response
 
 from .models import (
     Block, GlobalInfo, Launcher, Partial, Payout, PayoutAddress, Space,
+    Notification,
     Transaction,
 )
 from .serializers import (
@@ -137,11 +139,27 @@ class LauncherViewSet(
                 setattr(launcher, i, s.validated_data[i])
 
         try:
+            notification = launcher.notification
+        except ObjectDoesNotExist:
+            notification = Notification(launcher=launcher)
+
+        notification_changed = False
+        for i in (
+            'drop_size', 'drop_size_interval', 'drop_size_percent',
+            'failed_partials', 'failed_partials_percent', 'payment',
+        ):
+            if i in s.validated_data:
+                setattr(notification, i, s.validated_data[i])
+                notification_changed = True
+
+        try:
             update_referral(launcher, s.validated_data.get('referrer') or None)
         except ValueError as e:
             raise serializers.ValidationError({'referrer': str(e)})
 
         launcher.save()
+        if notification_changed:
+            notification.save()
         return Response(s.validated_data)
 
 

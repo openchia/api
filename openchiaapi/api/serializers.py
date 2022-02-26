@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Sum
 from rest_framework import serializers
 from .models import Block, Launcher, Partial, Payout, PayoutAddress, Transaction
@@ -52,6 +53,21 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             ret['custom_difficulty'] = instance.custom_difficulty
             ret['minimum_payout'] = instance.minimum_payout
             try:
+                notification = instance.notification
+                ret['size_drop'] = notification.size_drop
+                ret['size_drop_interval'] = notification.size_drop_interval
+                ret['size_drop_percent'] = notification.size_drop_percent
+                ret['failed_partials'] = notification.failed_partials
+                ret['failed_partials_percent'] = notification.failed_partials_percent
+                ret['payment'] = notification.payment
+            except ObjectDoesNotExist:
+                ret['size_drop'] = []
+                ret['size_drop_interval'] = None
+                ret['size_drop_percent'] = None
+                ret['failed_partials'] = None
+                ret['failed_partials_percent'] = None
+                ret['payment'] = None
+            try:
                 ret['referrer'] = instance.referral_set.filter(active=True)[0].referrer_id
             except IndexError:
                 ret['referrer'] = None
@@ -74,6 +90,17 @@ class LauncherUpdateSerializer(serializers.Serializer):
         ('HIGHEST', 'Highest'),
     ))
     minimum_payout = serializers.IntegerField(required=False, allow_null=True)
+
+    size_drop = serializers.MultipleChoiceField(choices=(
+        ('PUSH', 'Push'),
+        ('EMAIL', 'Email'),
+    ), required=False)
+    size_drop_interval = serializers.IntegerField(
+        required=False, allow_null=True, min_value=30, max_value=60 * 24,
+    )
+    size_drop_percent = serializers.IntegerField(
+        required=False, allow_null=True, min_value=10, max_value=100,
+    )
 
 
 class BlockSerializer(serializers.HyperlinkedModelSerializer):

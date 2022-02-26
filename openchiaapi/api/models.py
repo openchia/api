@@ -1,5 +1,6 @@
-from django.utils import timezone
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.utils import timezone
 
 
 class Block(models.Model):
@@ -75,9 +76,35 @@ class Launcher(models.Model):
     fcm_token = models.CharField(max_length=500, default=None, null=True)
     qrcode_token = models.CharField(max_length=64, default=None, null=True, db_index=True)
     push_missing_partials_hours = models.IntegerField(null=True, default=None)
-    push_failed_partials_percent = models.IntegerField(null=True, default=None)
-    push_payment = models.BooleanField(default=False)
     push_block_farmed = models.BooleanField(default=True)
+
+
+class Notification(models.Model):
+
+    class Meta:
+        db_table = 'notification'
+
+    # FIXME: move other fields from Launcher
+    launcher = models.OneToOneField(Launcher, on_delete=models.CASCADE, primary_key=True)
+    size_drop = ArrayField(
+        models.CharField(choices=(('PUSH', 'Push'), ('EMAIL', 'Email')), max_length=10),
+        size=2,
+        default=list,
+    )
+    size_drop_interval = models.IntegerField(null=True, default=None)
+    size_drop_percent = models.IntegerField(null=True, default=None)
+    size_drop_last_sent = models.DateTimeField(null=True, default=None)
+    failed_partials = ArrayField(
+        models.CharField(choices=(('PUSH', 'Push'), ('EMAIL', 'Email')), max_length=10),
+        size=2,
+        default=list,
+    )
+    failed_partials_percent = models.IntegerField(null=True, default=None)
+    payment = ArrayField(
+        models.CharField(choices=(('PUSH', 'Push'), ('EMAIL', 'Email')), max_length=10),
+        size=2,
+        default=list,
+    )
 
 
 class Singleton(models.Model):
