@@ -8,6 +8,7 @@ from .views import (
     LoginQRView,
     LoggedInView,
     NetspaceView,
+    PartialView,  # timeseries
     PartialViewSet,
     PayoutAddressViewSet,
     PayoutTransactionViewSet,
@@ -42,6 +43,7 @@ urlpatterns = [
     re_path(r'launcher_size/?', LauncherSizeView.as_view()),
     re_path(r'pool_size/?', PoolSizeView.as_view()),
     re_path(r'stats/netspace/?', NetspaceView.as_view()),
+    re_path(r'stats/partial/?', PartialView.as_view()),
     re_path(r'stats/xchprice/?', XCHPriceView.as_view()),
     path('login', LoginView.as_view()),
     path('login_qr', LoginQRView.as_view()),

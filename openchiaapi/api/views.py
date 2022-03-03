@@ -468,7 +468,7 @@ class LauncherSizeView(APIView):
     days_param = openapi.Parameter(
         'days',
         openapi.IN_QUERY,
-        description=f'Number of days (default: 7)',
+        description='Number of days (default: 7)',
         type=openapi.TYPE_INTEGER,
     )
 
@@ -521,7 +521,7 @@ class PoolSizeView(APIView):
     days_param = openapi.Parameter(
         'days',
         openapi.IN_QUERY,
-        description=f'Number of days (default: 7)',
+        description='Number of days (default: 7)',
         type=openapi.TYPE_INTEGER,
     )
 
@@ -565,7 +565,7 @@ class NetspaceView(APIView):
     days_param = openapi.Parameter(
         'days',
         openapi.IN_QUERY,
-        description=f'Number of days (default: 7)',
+        description='Number of days (default: 7)',
         type=openapi.TYPE_INTEGER,
     )
 
@@ -609,7 +609,7 @@ class XCHPriceView(APIView):
     days_param = openapi.Parameter(
         'days',
         openapi.IN_QUERY,
-        description=f'Number of days (default: 7)',
+        description='Number of days (default: 7)',
         type=openapi.TYPE_INTEGER,
     )
 
@@ -643,6 +643,79 @@ class XCHPriceView(APIView):
                     'datetime': r['_time'],
                     'field': r['_field'],
                     'value': r['_value'],
+                })
+
+        return Response(result)
+
+
+class PartialView(APIView):
+
+    launcher = openapi.Parameter(
+        'launcher',
+        openapi.IN_QUERY,
+        description='Launcher ID',
+        type=openapi.TYPE_STRING,
+    )
+    days_param = openapi.Parameter(
+        'days',
+        openapi.IN_QUERY,
+        description='Number of days (default: 7)',
+        type=openapi.TYPE_INTEGER,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[days_param, launcher],
+        responses={200: TimeseriesSerializer(many=True)},
+    )
+    def get(self, request, format=None):
+        client = get_influxdb_client()
+        query_api = client.query_api()
+
+        days = self.request.query_params.get('days', 7)
+        launcher = self.request.query_params.get('launcher')
+
+        params = {
+            '_days': f"-{days}d",
+            '_every': '1h',
+        }
+
+        if launcher:
+            params['_launcher'] = launcher
+
+        q = query_api.query(
+            textwrap.dedent('''from(bucket: "openchia_partial")
+              |> range(start: duration(v: _days), stop: now())
+              |> filter(fn: (r) => r["_measurement"] == "partial"){}
+              |> aggregateWindow(every: duration(v: _every), fn: sum, createEmpty: true)
+              |> yield(name: "sum")
+
+            from(bucket: "openchia_partial")
+              |> range(start: duration(v: _days), stop: now())
+              |> filter(fn: (r) => r["_measurement"] == "partial"){}
+              |> aggregateWindow(every: duration(v: _every), fn: count, createEmpty: true)
+              |> yield(name: "count")
+              '''.format(
+                *[
+                    '\n              |> filter(fn: (r) => r["launcher"] == _launcher)'
+                    if launcher else
+                    ''
+                ] * 2
+            )),
+            params=params,
+        )
+
+        result = []
+        for table in q:
+            default = table.columns[0].default_value
+            for r in table.records:
+                result.append({
+                    'result': default,
+                    'datetime': r['_time'],
+                    'field': r['_field'],
+                    'value': r['_value'],
+                    'launcher': r['launcher'],
+                    'harvester': r['harvester'],
+                    'error': r.values.get('error'),
                 })
 
         return Response(result)

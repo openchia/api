@@ -37,7 +37,7 @@ def get_influxdb_client():
 
 def days_to_every(days):
     if days == 1:
-        every = '1m'
+        every = '15m'
     elif days <= 7:
         every = '1h'
     elif days <= 31:
