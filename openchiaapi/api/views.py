@@ -145,11 +145,14 @@ class LauncherViewSet(
 
         notification_changed = False
         for i in (
-            'drop_size', 'drop_size_interval', 'drop_size_percent',
+            'size_drop', 'size_drop_interval', 'size_drop_percent',
             'failed_partials', 'failed_partials_percent', 'payment',
         ):
             if i in s.validated_data:
-                setattr(notification, i, s.validated_data[i])
+                value = s.validated_data[i]
+                if value is not None and i in ('payment', 'size_drop'):
+                    value = list(value)
+                setattr(notification, i, value)
                 notification_changed = True
 
         try:

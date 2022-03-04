@@ -67,7 +67,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
                 ret['size_drop_percent'] = None
                 ret['failed_partials'] = None
                 ret['failed_partials_percent'] = None
-                ret['payment'] = None
+                ret['payment'] = []
             try:
                 ret['referrer'] = instance.referral_set.filter(active=True)[0].referrer_id
             except IndexError:
@@ -92,15 +92,19 @@ class LauncherUpdateSerializer(serializers.Serializer):
     ))
     minimum_payout = serializers.IntegerField(required=False, allow_null=True)
 
+    payment = serializers.MultipleChoiceField(choices=(
+        ('PUSH', 'Push'),
+        ('EMAIL', 'Email'),
+    ), required=False)
     size_drop = serializers.MultipleChoiceField(choices=(
         ('PUSH', 'Push'),
         ('EMAIL', 'Email'),
     ), required=False)
     size_drop_interval = serializers.IntegerField(
-        required=False, allow_null=True, min_value=30, max_value=60 * 24,
+        required=False, allow_null=True, min_value=45, max_value=60 * 24,
     )
     size_drop_percent = serializers.IntegerField(
-        required=False, allow_null=True, min_value=10, max_value=100,
+        required=False, allow_null=True, min_value=20, max_value=100,
     )
 
 
