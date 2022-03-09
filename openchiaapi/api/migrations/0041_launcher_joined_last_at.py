@@ -3,6 +3,13 @@
 from django.db import migrations, models
 
 
+def copy_joined_at(apps, schema_editor):
+    Launcher = apps.get_model('api', 'Launcher')
+    for launcher in Launcher.objects.all():
+        launcher.joined_last_at = launcher.joined_at
+        launcher.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -15,4 +22,5 @@ class Migration(migrations.Migration):
             name='joined_last_at',
             field=models.DateTimeField(default=None, null=True),
         ),
+        migrations.RunPython(copy_joined_at),
     ]
