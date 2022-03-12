@@ -674,8 +674,11 @@ class PartialView(APIView):
         client = get_influxdb_client()
         query_api = client.query_api()
 
-        days = self.request.query_params.get('days', 7)
+        days = int(self.request.query_params.get('days', 7))
         launcher = self.request.query_params.get('launcher')
+
+        if days >= 7:
+            days = 7
 
         params = {
             '_days': f"-{days}d",
@@ -701,24 +704,32 @@ class PartialView(APIView):
                 *[
                     '\n              |> filter(fn: (r) => r["launcher"] == _launcher)'
                     if launcher else
-                    ''
+                    '\n              |> drop(columns: ["launcher", "harvester"])'
                 ] * 2
             )),
             params=params,
         )
 
         result = []
+        num = 0
         for table in q:
             default = table.columns[0].default_value
             for r in table.records:
-                result.append({
+                if num > 300:
+                    break
+                item = {
                     'result': default,
                     'datetime': r['_time'],
                     'field': r['_field'],
                     'value': r['_value'],
-                    'launcher': r['launcher'],
-                    'harvester': r['harvester'],
                     'error': r.values.get('error'),
-                })
+                }
+                if launcher:
+                    item.update({
+                        'launcher': r['launcher'],
+                        'harvester': r['harvester'],
+                    })
+                result.append(item)
+                num += 1
 
         return Response(result)
