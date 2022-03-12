@@ -692,12 +692,14 @@ class PartialView(APIView):
             textwrap.dedent('''from(bucket: "openchia_partial")
               |> range(start: duration(v: _days), stop: now())
               |> filter(fn: (r) => r["_measurement"] == "partial"){}
+              |> map(fn: (r) => ({{r with error: if r.error != "" then "true" else "false"}}))
               |> aggregateWindow(every: duration(v: _every), fn: sum, createEmpty: true)
               |> yield(name: "sum")
 
             from(bucket: "openchia_partial")
               |> range(start: duration(v: _days), stop: now())
               |> filter(fn: (r) => r["_measurement"] == "partial"){}
+              |> map(fn: (r) => ({{r with error: if r.error != "" then "true" else "false"}}))
               |> aggregateWindow(every: duration(v: _every), fn: count, createEmpty: true)
               |> yield(name: "count")
               '''.format(
@@ -715,7 +717,8 @@ class PartialView(APIView):
         for table in q:
             default = table.columns[0].default_value
             for r in table.records:
-                if num > 300:
+                # 24 per day -- 7 days -- 2 per hour -- 2 sum/count -- breath room
+                if num > 24 * 7 * 2 * 2 * 2:
                     break
                 item = {
                     'result': default,
