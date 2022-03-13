@@ -631,6 +631,7 @@ class XCHPriceView(APIView):
             textwrap.dedent('''from(bucket: "openchia")
               |> range(start: duration(v: _days), stop: now())
               |> filter(fn: (r) => r["_measurement"] == "xchprice")
+              |> filter(fn: (r) => contains(value: r["_field"], set: ["btc", "eth"]) == false)
               |> aggregateWindow(every: duration(v: _every), fn: mean, createEmpty: false)
               |> yield(name: "mean")'''),
             params={
