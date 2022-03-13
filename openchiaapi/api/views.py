@@ -675,7 +675,7 @@ class PartialView(APIView):
         query_api = client.query_api()
 
         days = int(self.request.query_params.get('days', 7))
-        launcher = self.request.query_params.get('launcher')
+        launcher = self.request.query_params['launcher']
 
         if days >= 7:
             days = 7
@@ -683,34 +683,28 @@ class PartialView(APIView):
         params = {
             '_days': f"-{days}d",
             '_every': '1h',
+            '_launcher': launcher,
         }
 
-        if launcher:
-            params['_launcher'] = launcher
-
         q = query_api.query(
-            textwrap.dedent('''from(bucket: "openchia_partial")
+            textwrap.dedent(
+                '''from(bucket: "openchia_partial")
               |> range(start: duration(v: _days), stop: now())
-              |> filter(fn: (r) => r["_measurement"] == "partial"){}
-              |> map(fn: (r) => ({{r with error: if r.error != "" then "true" else "false"}}))
+              |> filter(fn: (r) => r["_measurement"] == "partial")
+              |> filter(fn: (r) => r["launcher"] == _launcher)
+              |> map(fn: (r) => ({r with error: if r.error != "" then "true" else "false"}))
               |> aggregateWindow(every: duration(v: _every), fn: sum, createEmpty: true)
               |> yield(name: "sum")
 
             from(bucket: "openchia_partial")
               |> range(start: duration(v: _days), stop: now())
-              |> filter(fn: (r) => r["_measurement"] == "partial"){}
-              |> map(fn: (r) => ({{r with error: if r.error != "" then "true" else "false"}}))
+              |> filter(fn: (r) => r["_measurement"] == "partial")
+              |> filter(fn: (r) => r["launcher"] == _launcher)
+              |> map(fn: (r) => ({r with error: if r.error != "" then "true" else "false"}))
               |> aggregateWindow(every: duration(v: _every), fn: count, createEmpty: true)
               |> yield(name: "count")
-              '''.format(
-                *[
-                    '\n              |> filter(fn: (r) => r["launcher"] == _launcher)'
-                    if launcher else
-                    '\n              |> drop(columns: ["launcher", "harvester"])'
-                ] * 2
-            )),
-            params=params,
-        )
+              '''
+            ), params=params)
 
         result = []
         num = 0
@@ -725,13 +719,10 @@ class PartialView(APIView):
                     'datetime': r['_time'],
                     'field': r['_field'],
                     'value': r['_value'],
+                    'launcher': r['launcher'],
+                    'harvester': r['harvester'],
                     'error': r.values.get('error'),
                 }
-                if launcher:
-                    item.update({
-                        'launcher': r['launcher'],
-                        'harvester': r['harvester'],
-                    })
                 result.append(item)
                 num += 1
 
