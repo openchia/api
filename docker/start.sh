@@ -3,7 +3,8 @@ set -e
 
 export CHIA_ROOT=/data/chia/${CHIA_NETWORK:=mainnet}
 export POOL_CONFIG_PATH="/data/config.yaml"
-export POOL_LOG_PATH="/data/pool_log/stdout"
+POOL_LOG_PATH=${POOL_LOG_PATH:=/data/pool_log/stdout}
+export POOL_LOG_PATH
 
 cd /root/api
 ../venv/bin/python manage.py collectstatic --no-input

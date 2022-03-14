@@ -19,9 +19,15 @@ class LogThread(threading.Thread):
         self._consumers = []
         self._last = []
 
-    def add_consumer(self, i):
-        self._consumers.append(i)
-        i.send(text_data=json.dumps({'data': '\n'.join(self._last)}))
+    def add_consumer(self, c):
+        self._consumers.append(c)
+        data_send = []
+        for i in self._last:
+            try:
+                data_send.append(json.loads(i))
+            except ValueError:
+                data_send.append(i)
+        c.send(text_data=json.dumps({'data': data_send}))
 
     def remove_consumer(self, i):
         global LOG_THREAD
@@ -44,8 +50,14 @@ class LogThread(threading.Thread):
         seek = os.stat(LOG_PATH).st_size - 2000
         if seek > 0:
             self.fp.seek(seek)
-            self._last = self.fp.read().split('\n')[-LOG_LINES:]
-            self.send(json.dumps({"data": '\n'.join(self._last)}))
+            self._last = self.fp.read().strip('\n').split('\n')[-LOG_LINES:]
+            data_send = []
+            for i in self._last:
+                try:
+                    data_send.append(json.loads(i))
+                except ValueError:
+                    data_send.append(i)
+            self.send(json.dumps({"data": data_send}))
 
         self.watch_manager.add_watch(
             [LOG_PATH, os.path.dirname(LOG_PATH)],
@@ -58,9 +70,16 @@ class LogThread(threading.Thread):
 
             data = "".join(queue)
             if data:
-                self._last += data.split('\n')
+                data_split = data.strip('\n').split('\n')
+                self._last += data_split
                 self._last = self._last[-LOG_LINES:]
-                self.send(json.dumps({"data": data}))
+                data_send = []
+                for i in data_split:
+                    try:
+                        data_send.append(json.loads(i))
+                    except ValueError:
+                        data_send.append(i)
+                self.send(json.dumps({"data": data_send}))
             queue[:] = []
 
             if notifier.check_events():
@@ -83,6 +102,10 @@ class PoolLogConsumer(WebsocketConsumer):
     def connect(self):
         global LOG_THREAD
         self.accept()
+
+        if not os.path.exists(LOG_PATH):
+            return
+
         if LOG_THREAD is None:
             LOG_THREAD = LogThread()
             LOG_THREAD.start()
