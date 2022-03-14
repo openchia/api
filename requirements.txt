@@ -11,3 +11,4 @@ cachetools
 qrcode
 pytz
 influxdb_client==1.25.0
+py-spy==0.3.11
