@@ -53,6 +53,12 @@ REST_FRAMEWORK = {
         'api.renderer.NoHTMLFormBrowsableAPIRenderer'
     ),
     'PAGE_SIZE': 100,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '500/hour',
+    }
 }
 
 
