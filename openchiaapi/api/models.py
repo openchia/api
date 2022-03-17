@@ -72,6 +72,7 @@ class Launcher(models.Model):
     joined_at = models.DateTimeField(default=None, null=True)
     joined_last_at = models.DateTimeField(default=None, null=True)
     left_at = models.DateTimeField(default=None, null=True)
+    left_last_at = models.DateTimeField(default=None, null=True)
     email = models.EmailField(default=None, null=True)
     notify_missing_partials_hours = models.IntegerField(default=1, null=True)
     fcm_token = models.CharField(max_length=500, default=None, null=True)
