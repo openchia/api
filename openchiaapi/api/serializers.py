@@ -28,6 +28,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'joined_at',
             'payout',
             'fee',
+            'points_of_total',
         ]
 
     def get_points_of_total(self, instance):
