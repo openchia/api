@@ -32,7 +32,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
         ]
 
     def get_points_of_total(self, instance):
-        return float(self.instance.share_pplns)
+        return float(instance.share_pplns)
 
     def get_fee(self, instance):
         if self.context['view'].get_view_name() != 'Launcher Instance':
