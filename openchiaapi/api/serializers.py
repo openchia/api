@@ -2,7 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Sum
 from rest_framework import serializers
 
-from pool.util import days_pooling, stay_fee_discount
+from pool.util import days_pooling, stay_fee_discount, size_discount
 
 from .models import Block, Launcher, Partial, Payout, PayoutAddress, Transaction
 from .utils import get_pool_fees
@@ -38,14 +38,16 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
         if self.context['view'].get_view_name() != 'Launcher Instance':
             return {}
         days = days_pooling(instance.joined_last_at, instance.left_last_at, instance.is_pool_member)
-        stay_length = stay_fee_discount(POOL_FEES['stay_discount'], POOL_FEES['stay_length'], days)
+        stay_length = float(stay_fee_discount(POOL_FEES['stay_discount'], POOL_FEES['stay_length'], days))
+        size = float(size_discount(instance.estimated_size, POOL_FEES['size_discount']))
         return {
             'stay_length_days': days,
             'stay_length_days_max': POOL_FEES['stay_length'],
-            'stay_length_discount': POOL_FEES['pool'] * float(stay_length),
+            'stay_length_discount': POOL_FEES['pool'] * stay_length,
             'stay_length_discount_max': POOL_FEES['pool'] * POOL_FEES['stay_discount'],
+            'size_discount': POOL_FEES['pool'] * size,
             'pool': POOL_FEES['pool'],
-            'final': POOL_FEES['pool'] * (1 - float(stay_length)),
+            'final': POOL_FEES['pool'] * (1 - stay_length - size),
         }
 
     def get_payout(self, instance):
