@@ -5,7 +5,6 @@ import time
 import qrcode
 import qrcode.image.svg
 import textwrap
-import yaml
 
 from blspy import AugSchemeMPL, G1Element, G2Element
 from chia.pools.pool_wallet_info import PoolState
@@ -53,18 +52,11 @@ from .serializers import (
 from .utils import (
     days_to_every,
     get_influxdb_client,
-    get_pool_info, estimated_time_to_win,
+    get_pool_info,
+    get_pool_target_address,
+    estimated_time_to_win,
 )
 from referral.utils import update_referral
-
-
-def get_pool_target_address():
-    cfg_path = os.environ.get('POOL_CONFIG_PATH') or ''
-    if not os.path.exists(cfg_path):
-        raise ValueError('POOL_CONFIG_PATH does not exist.')
-    with open(cfg_path, 'r') as f:
-        cfg = yaml.safe_load(f.read())
-    return cfg['wallets'][0]['address']
 
 
 POOL_TARGET_ADDRESS = get_pool_target_address()
@@ -104,13 +96,6 @@ class LauncherViewSet(
     search_fields = ['launcher_id', 'name']
     ordering_fields = ['points', 'points_pplns', 'difficulty']
     ordering = ['-points']
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['total_points'] = Launcher.objects.filter(is_pool_member=True).aggregate(
-            total=Sum('points')
-        )['total']
-        return context
 
     def get_serializer_class(self, *args, **kwargs):
         if self.request.method == 'PUT':

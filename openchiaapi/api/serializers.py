@@ -1,11 +1,19 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Sum
 from rest_framework import serializers
+
+from pool.util import days_pooling, stay_fee_discount
+
 from .models import Block, Launcher, Partial, Payout, PayoutAddress, Transaction
+from .utils import get_pool_fees
+
+
+POOL_FEES = get_pool_fees()
 
 
 class LauncherSerializer(serializers.HyperlinkedModelSerializer):
     payout = serializers.SerializerMethodField('get_payout')
+    fee = serializers.SerializerMethodField('get_fee')
 
     class Meta:
         model = Launcher
@@ -18,9 +26,24 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'estimated_size',
             'joined_at',
             'payout',
+            'fee',
         ]
 
+    def get_fee(self, instance):
+        if self.context['view'].get_view_name() != 'Launcher Instance':
+            return {}
+        days = days_pooling(instance.joined_last_at, instance.left_last_at, instance.is_pool_member)
+        stay_length = stay_fee_discount(POOL_FEES['stay_discount'], POOL_FEES['stay_length'], days)
+        return {
+            'days_pooling': days,
+            'stay_length_discount': stay_length,
+            'pool': POOL_FEES['pool'],
+            'final': POOL_FEES['pool'] * (1 - float(stay_length)),
+        }
+
     def get_payout(self, instance):
+        if self.context['view'].get_view_name() != 'Launcher Instance':
+            return {}
         return {
             'total_paid': instance.payoutaddress_set.exclude(
                 transaction__confirmed_block_index=None
