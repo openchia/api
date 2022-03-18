@@ -35,8 +35,10 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
         days = days_pooling(instance.joined_last_at, instance.left_last_at, instance.is_pool_member)
         stay_length = stay_fee_discount(POOL_FEES['stay_discount'], POOL_FEES['stay_length'], days)
         return {
-            'days_pooling': days,
-            'stay_length_discount': stay_length,
+            'stay_length_days': days,
+            'stay_length_days_max': POOL_FEES['stay_length'],
+            'stay_length_discount': POOL_FEES['pool'] * float(stay_length),
+            'stay_length_discount_max': POOL_FEES['pool'] * POOL_FEES['stay_discount'],
             'pool': POOL_FEES['pool'],
             'final': POOL_FEES['pool'] * (1 - float(stay_length)),
         }
