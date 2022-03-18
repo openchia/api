@@ -12,6 +12,7 @@ POOL_FEES = get_pool_fees()
 
 
 class LauncherSerializer(serializers.HyperlinkedModelSerializer):
+    points_of_total = serializers.SerializerMethodField('get_points_of_total')
     payout = serializers.SerializerMethodField('get_payout')
     fee = serializers.SerializerMethodField('get_fee')
 
@@ -28,6 +29,9 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'payout',
             'fee',
         ]
+
+    def get_points_of_total(self, instance):
+        return float(self.instance.share_pplns)
 
     def get_fee(self, instance):
         if self.context['view'].get_view_name() != 'Launcher Instance':
