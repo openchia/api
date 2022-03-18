@@ -5,7 +5,6 @@ from .models import Block, Launcher, Partial, Payout, PayoutAddress, Transaction
 
 
 class LauncherSerializer(serializers.HyperlinkedModelSerializer):
-    points_of_total = serializers.SerializerMethodField('get_points_of_total')
     payout = serializers.SerializerMethodField('get_payout')
 
     class Meta:
@@ -15,15 +14,11 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'points_pplns',
             'share_pplns',
             'difficulty',
-            'is_pool_member', 'points_of_total', 'estimated_size',
+            'is_pool_member',
+            'estimated_size',
             'joined_at',
             'payout',
         ]
-
-    def get_points_of_total(self, instance):
-        if not self.context.get('total_points'):
-            return 0
-        return (instance.points / self.context['total_points']) * 100
 
     def get_payout(self, instance):
         return {
