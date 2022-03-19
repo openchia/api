@@ -1,4 +1,4 @@
-git+https://github.com/openchia/chia-blockchain.git@main#egg=chia-blockchain
+git+https://github.com/openchia/chia-blockchain.git@issues/websockets#egg=chia-blockchain
 git+https://github.com/openchia/pool.git@main#egg=pool
 djangorestframework==3.12.4
 drf-yasg==1.20.0
@@ -14,3 +14,4 @@ influxdb_client==1.25.0
 py-spy==0.3.11
 uvicorn==0.14.0
 gunicorn==20.1.0
+websockets==10.2
