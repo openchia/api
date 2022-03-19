@@ -30,8 +30,10 @@ class LogThread(threading.Thread):
         c.send(text_data=json.dumps({'data': data_send}))
 
     def remove_consumer(self, i):
-        global LOG_THREAD
-        self._consumers.remove(i)
+        try:
+            self._consumers.remove(i)
+        except Exception:
+            pass
 
     def send(self, data):
         for i in list(self._consumers):
@@ -112,7 +114,9 @@ class PoolLogConsumer(WebsocketConsumer):
         LOG_THREAD.add_consumer(self)
 
     def disconnect(self, close_code):
-        pass
+        global LOG_THREAD
+        if LOG_THREAD is not None:
+            LOG_THREAD.remove_consumer(self)
 
     def receive(self, text_data):
         pass
