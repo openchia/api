@@ -3,7 +3,7 @@ set -e
 
 export CHIA_ROOT=/data/chia/${CHIA_NETWORK:=mainnet}
 export POOL_CONFIG_PATH="/data/config.yaml"
-POOL_LOG_PATH=${POOL_LOG_PATH:=/data/pool_log/stdout}
+POOL_LOG_PATH=${POOL_LOG_PATH:=/data/pool_log/stdout.json}
 export POOL_LOG_PATH
 
 cd /root/api
@@ -21,4 +21,4 @@ sed -i s,%%DOMAIN%%,${DOMAIN:=localhost},g /etc/Caddyfile
 
 caddy start -config /etc/Caddyfile
 
-exec ../venv/bin/daphne --bind 0.0.0.0 --port 8000 openchiaapi.asgi:application
+exec ../venv/bin/gunicorn -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 openchiaapi.asgi:application
