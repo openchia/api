@@ -51,7 +51,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
         }
 
     def get_payout(self, instance):
-        if self.context['view'].get_view_name() != 'Launcher Instance':
+        if 'view' not in self.context or self.context['view'].get_view_name() != 'Launcher Instance':
             return {}
         return {
             'total_paid': instance.payoutaddress_set.exclude(
