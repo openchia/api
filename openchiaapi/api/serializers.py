@@ -35,7 +35,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
         return float(instance.share_pplns)
 
     def get_fee(self, instance):
-        if self.context['view'].get_view_name() != 'Launcher Instance':
+        if 'view' not in self.context or self.context['view'].get_view_name() != 'Launcher Instance':
             return {}
         days = days_pooling(instance.joined_last_at, instance.left_last_at, instance.is_pool_member)
         stay_length = float(stay_fee_discount(POOL_FEES['stay_discount'], POOL_FEES['stay_length'], days))
