@@ -1,5 +1,5 @@
 FROM caddy:2.4.6-alpine as caddyimage
-FROM debian:stable
+FROM debian:stable-slim
 
 # Identify the maintainer of an image
 LABEL maintainer="contact@openchia.io"
