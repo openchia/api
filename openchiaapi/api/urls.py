@@ -7,6 +7,7 @@ from .views import (
     LoginView,
     LoginQRView,
     LoggedInView,
+    MempoolView,
     NetspaceView,
     PartialView,  # timeseries
     PartialViewSet,
@@ -42,6 +43,7 @@ urlpatterns = [
     path('giveaway/closest', ClosestTicketView.as_view()),
     re_path(r'launcher_size/?', LauncherSizeView.as_view()),
     re_path(r'pool_size/?', PoolSizeView.as_view()),
+    re_path(r'stats/mempool/?', MempoolView.as_view()),
     re_path(r'stats/netspace/?', NetspaceView.as_view()),
     re_path(r'stats/partial/?', PartialView.as_view()),
     re_path(r'stats/xchprice/?', XCHPriceView.as_view()),

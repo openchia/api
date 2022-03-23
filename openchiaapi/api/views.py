@@ -713,3 +713,47 @@ class PartialView(APIView):
                 num += 1
 
         return Response(result)
+
+
+class MempoolView(APIView):
+
+    days_param = openapi.Parameter(
+        'days',
+        openapi.IN_QUERY,
+        description='Number of days (default: 7)',
+        type=openapi.TYPE_INTEGER,
+    )
+
+    @swagger_auto_schema(
+        manual_parameters=[days_param],
+        responses={200: TimeseriesSerializer(many=True)},
+    )
+    def get(self, request, format=None):
+        client = get_influxdb_client()
+        query_api = client.query_api()
+
+        days = self.request.query_params.get('days', 7)
+        every = days_to_every(int(days))
+
+        q = query_api.query(
+            textwrap.dedent('''from(bucket: "openchia")
+              |> range(start: duration(v: _days), stop: now())
+              |> filter(fn: (r) => r["_measurement"] == "mempool")
+              |> aggregateWindow(every: duration(v: _every), fn: mean, createEmpty: false)
+              |> yield(name: "mean")'''),
+            params={
+                '_days': f"-{days}d",
+                '_every': every,
+            },
+        )
+
+        result = []
+        for table in q:
+            for r in table.records:
+                result.append({
+                    'datetime': r['_time'],
+                    'field': r['_field'],
+                    'value': r['_value'],
+                })
+
+        return Response(result)
