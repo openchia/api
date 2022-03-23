@@ -47,6 +47,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'stay_length_discount': POOL_FEES['pool'] * stay_length,
             'stay_length_discount_max': POOL_FEES['pool'] * POOL_FEES['stay_discount'],
             'size_discount': POOL_FEES['pool'] * size,
+            'max_discount': POOL_FEES['max_discount'],
             'pool': POOL_FEES['pool'],
             'final': POOL_FEES['pool'] * (1 - stay_length - size),
         }
