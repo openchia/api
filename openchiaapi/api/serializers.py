@@ -19,7 +19,10 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Launcher
         fields = [
-            'launcher_id', 'name', 'p2_singleton_puzzle_hash', 'points',
+            'launcher_id',
+            'name',
+            'p2_singleton_puzzle_hash',
+            'points',
             'points_pplns',
             'share_pplns',
             'difficulty',
