@@ -26,6 +26,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'is_pool_member',
             'estimated_size',
             'joined_at',
+            'joined_last_at',
             'payout',
             'fee',
             'points_of_total',
