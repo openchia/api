@@ -1,5 +1,6 @@
 import hashlib
 import io
+import logging
 import os
 import time
 import qrcode
@@ -59,6 +60,7 @@ from .utils import (
 from referral.utils import update_referral
 
 
+logger = logging.getLogger('api.views')
 POOL_TARGET_ADDRESS = get_pool_target_address()
 
 
@@ -180,6 +182,23 @@ class StatsView(APIView):
             profitability += (b.amount / 1000000000000) / (b.pool_space / 1099511627776)
         profitability /= 30
 
+        client = get_influxdb_client()
+        query_api = client.query_api()
+
+        try:
+            q = query_api.query(
+                textwrap.dedent('''from(bucket: "openchia")
+                  |> range(start: duration(v: "-30m"))
+                  |> filter(fn: (r) => r["_measurement"] == "mempool")
+                  |> last()'''),
+            )
+            mempool_full_pct = int(q[0].records[0]['_value'])
+            blockchain_duststorm = mempool_full_pct > 90
+        except Exception:
+            logger.error('Failed to get mempool', exc_info=True)
+            mempool_full_pct = 0
+            blockchain_duststorm = False
+
         pi = StatsSerializer(data={
             'fee': Decimal(pool_info['fee']),
             'farmers': farmers_total,
@@ -191,6 +210,8 @@ class StatsView(APIView):
             'time_since_last_win': time_since_last_win,
             'blockchain_height': globalinfo.blockchain_height,
             'blockchain_space': int(globalinfo.blockchain_space),
+            'blockchain_duststorm': blockchain_duststorm,
+            'blockchain_mempool_full_pct': mempool_full_pct,
             'reward_system': 'PPLNS',
             'last_rewards': [{
                 'date': datetime.utcfromtimestamp(i.timestamp),

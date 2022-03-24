@@ -202,7 +202,9 @@ class PayoutTransactionSerializer(serializers.Serializer):
 
 
 class StatsSerializer(serializers.Serializer):
+    blockchain_duststorm = serializers.BooleanField()
     blockchain_height = serializers.IntegerField()
+    blockchain_mempool_full_pct = serializers.IntegerField()
     blockchain_space = serializers.IntegerField()
     fee = serializers.DecimalField(max_digits=3, decimal_places=2)
     estimate_win = serializers.IntegerField()
