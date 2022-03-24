@@ -192,6 +192,7 @@ class PayoutAddress(models.Model):
     pool_puzzle_hash = models.CharField(max_length=64, default='')
     launcher = models.ForeignKey(Launcher, on_delete=models.SET_NULL, null=True, default=None)
     amount = models.BigIntegerField()
+    fee_amount = models.BigIntegerField(null=True, default=None)
     referral = models.ForeignKey('referral.Referral', null=True, default=None, on_delete=models.SET_NULL)
     referral_amount = models.BigIntegerField(default=0)
     transaction = models.ForeignKey(Transaction, null=True, on_delete=models.SET_NULL)
