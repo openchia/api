@@ -7,6 +7,10 @@ class Block(models.Model):
 
     class Meta:
         db_table = 'block'
+        indexes = [
+            models.Index(name='farmed_by_idx', fields=['farmed_by_id']),
+        ]
+
 
     name = models.CharField(max_length=64)
     singleton = models.CharField(max_length=64)
@@ -17,6 +21,8 @@ class Block(models.Model):
     amount = models.BigIntegerField()
     absorb_fee = models.IntegerField(default=0)
     farmed_by = models.ForeignKey('api.Launcher', on_delete=models.SET_NULL, null=True)
+    launcher_etw = models.BigIntegerField(default=-1)
+    launcher_effort = models.IntegerField(default=-1)
     pool_space = models.BigIntegerField(default=0)
     estimate_to_win = models.BigIntegerField(default=-1)
     luck = models.IntegerField(default=-1)
@@ -73,6 +79,9 @@ class Launcher(models.Model):
     joined_last_at = models.DateTimeField(default=None, null=True)
     left_at = models.DateTimeField(default=None, null=True)
     left_last_at = models.DateTimeField(default=None, null=True)
+    current_etw = models.BigIntegerField(default=None, null=True)
+    last_block_timestamp = models.BigIntegerField(default=None, null=True)
+    last_block_etw = models.BigIntegerField(default=None, null=True)
     email = models.EmailField(default=None, null=True)
     notify_missing_partials_hours = models.IntegerField(default=1, null=True)
     fcm_token = models.CharField(max_length=500, default=None, null=True)
