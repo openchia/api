@@ -20,6 +20,6 @@ class TokenAuthentication(authentication.BaseAuthentication):
         token = auth.split('Bearer ')[-1]
         launcher = Launcher.objects.filter(qrcode_token=token)
         if launcher.exists():
-            return None, launcher[0]
+            return launcher[0], launcher[0]
         else:
             raise exceptions.AuthenticationFailed()

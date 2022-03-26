@@ -89,6 +89,9 @@ class Launcher(models.Model):
     push_missing_partials_hours = models.IntegerField(null=True, default=None)
     push_block_farmed = models.BooleanField(default=True)
 
+    def is_authenticated(self):
+        return False
+
 
 class Notification(models.Model):
 
