@@ -1,8 +1,10 @@
+import time
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Sum
 from rest_framework import serializers
 
-from pool.util import days_pooling, stay_fee_discount, size_discount
+from pool.util import calculate_effort, days_pooling, stay_fee_discount, size_discount
 
 from .models import Block, Launcher, Partial, Payout, PayoutAddress, Transaction
 from .utils import get_pool_fees
@@ -104,6 +106,18 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
                 ret['referrer'] = instance.referral_set.filter(active=True)[0].referrer_id
             except IndexError:
                 ret['referrer'] = None
+
+        if 'view' in self.context and self.context['view'].get_view_name() == 'Launcher Instance':
+            ret['current_etw'] = instance.current_etw
+            if instance.last_block_timestamp and instance.current_etw:
+                ret['current_effort'] = calculate_effort(
+                    instance.last_block_etw or -1,
+                    instance.last_block_timestamp,
+                    instance.current_etw,
+                    int(time.time()),
+                )
+            else:
+                ret['current_effort'] = None
         return ret
 
 
