@@ -18,13 +18,8 @@ class LogTask(object):
 
     async def add_consumer(self, c):
         self._consumers.append(c)
-        data_send = []
-        for i in self._last:
-            try:
-                data_send.append(json.loads(i))
-            except ValueError:
-                data_send.append(i)
-        await c.send(text_data=json.dumps({'data': data_send}))
+        if self._last:
+            await c.send(text_data=json.dumps({'data': self._last}))
 
     async def remove_consumer(self, i):
         try:
@@ -33,9 +28,18 @@ class LogTask(object):
             pass
 
     async def send(self, data):
-        for i in list(self._consumers):
+        for c in list(self._consumers):
             try:
-                await i.send(text_data=data)
+                # FIXME: fixed number
+                if len(c.subscribed_logs) != 2:
+                    send_data = []
+                    for j in data:
+                        if 'partials' not in c.subscribed_logs and j['name'] == 'partials':
+                            continue
+                        send_data.append(j)
+                else:
+                    send_data = data
+                await c.send(text_data=json.dumps({'data': send_data}))
             except Exception:
                 pass
 
@@ -59,8 +63,10 @@ class LogTask(object):
             except asyncio.TimeoutError:
                 if data_send:
                     send = list(data_send)
+                    self._last += send
+                    self._last = self._last[-LOG_LINES:]
                     data_send[:] = []
-                    await self.send(json.dumps({"data": send}))
+                    await self.send(send)
                 continue
 
             if not line:
@@ -76,8 +82,10 @@ class LogTask(object):
 
             if len(data_send) >= 10:
                 send = list(data_send)
+                self._last += send
+                self._last = self._last[-LOG_LINES:]
                 data_send[:] = []
-                await self.send(json.dumps({"data": send}))
+                await self.send(send)
 
         proc.kill
         await proc.communicate()
@@ -88,6 +96,9 @@ class LogTask(object):
 class PoolLogConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         global LOG_TASK
+
+        self.subscribed_logs = ['payments']
+
         await self.accept()
 
         if not os.path.exists(LOG_DIR):
@@ -104,4 +115,14 @@ class PoolLogConsumer(AsyncWebsocketConsumer):
             LOG_TASK.remove_consumer(self)
 
     async def receive(self, text_data=None, bytes_data=None):
-        pass
+        if not text_data:
+            return
+
+        data = json.loads(text_data)
+        for i in ('partials', 'payments'):
+            if i in data:
+                if i not in self.subscribed_logs:
+                    self.subscribed_logs.append(i)
+            else:
+                if i in self.subscribed_logs:
+                    self.subscribed_logs.remove(i)
