@@ -39,7 +39,8 @@ class LogTask(object):
                         send_data.append(j)
                 else:
                     send_data = data
-                await c.send(text_data=json.dumps({'data': send_data}))
+                if send_data:
+                    await c.send(text_data=json.dumps({'data': send_data}))
             except Exception:
                 pass
 
