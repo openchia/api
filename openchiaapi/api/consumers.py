@@ -88,7 +88,7 @@ class LogTask(object):
                 data_send[:] = []
                 await self.send(send)
 
-        proc.kill
+        proc.kill()
         await proc.communicate()
 
         LOG_TASK = None
@@ -113,7 +113,7 @@ class PoolLogConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         global LOG_TASK
         if LOG_TASK is not None:
-            LOG_TASK.remove_consumer(self)
+            await LOG_TASK.remove_consumer(self)
 
     async def receive(self, text_data=None, bytes_data=None):
         if not text_data:
