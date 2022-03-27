@@ -17,6 +17,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
     points_of_total = serializers.SerializerMethodField('get_points_of_total')
     payout = serializers.SerializerMethodField('get_payout')
     fee = serializers.SerializerMethodField('get_fee')
+    blocks = serializers.SerializerMethodField('get_blocks')
 
     class Meta:
         model = Launcher
@@ -35,6 +36,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'payout',
             'fee',
             'points_of_total',
+            'blocks',
         ]
 
     def get_points_of_total(self, instance):
@@ -72,6 +74,13 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             ).values('transaction__transaction').order_by('transaction__transaction').aggregate(
                 transactions=Count('transaction__transaction', distinct=True)
             )['transactions']
+        }
+
+    def get_blocks(self, instance):
+        if 'view' not in self.context or self.context['view'].get_view_name() != 'Launcher Instance':
+            return {}
+        return {
+            'total': instance.block_set.all().count(),
         }
 
     def to_representation(self, instance):
