@@ -40,7 +40,7 @@ class LogTask(object):
                 else:
                     send_data = data
                 if send_data:
-                    await c.send(text_data=json.dumps({'data': send_data}))
+                    asyncio.create_task(c.send(text_data=json.dumps({'data': send_data})))
             except Exception:
                 pass
 
