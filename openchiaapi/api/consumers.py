@@ -57,6 +57,13 @@ class LogTask(object):
             stderr=subprocess.DEVNULL,
         )
 
+        read_task = asyncio.create_task(self.read(proc))
+        await proc.wait()
+        read_task.cancel()
+
+        LOG_TASK = None
+
+    async def read(self, proc):
         data_send = []
         while self._consumers:
             try:
@@ -89,9 +96,6 @@ class LogTask(object):
                 await self.send(send)
 
         proc.kill()
-        await proc.communicate()
-
-        LOG_TASK = None
 
 
 class PoolLogConsumer(AsyncWebsocketConsumer):
