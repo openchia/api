@@ -97,7 +97,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'points': last_day.aggregate(points=Sum('difficulty'))['points'] or 0,
             'successful': successful,
             'failed': failed,
-            'performance': (successful / total) * 100,
+            'performance': (successful / total) * 100 if total else None,
             'harvesters': last_day.aggregate(num=Count('harvester_id', distinct=True))['num'],
         }
 
