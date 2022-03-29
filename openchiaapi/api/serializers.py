@@ -18,6 +18,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
     payout = serializers.SerializerMethodField('get_payout')
     fee = serializers.SerializerMethodField('get_fee')
     blocks = serializers.SerializerMethodField('get_blocks')
+    partials = serializers.SerializerMethodField('get_partials')
 
     class Meta:
         model = Launcher
@@ -37,6 +38,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'fee',
             'points_of_total',
             'blocks',
+            'partials',
         ]
 
     def get_points_of_total(self, instance):
@@ -81,6 +83,22 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             return {}
         return {
             'total': instance.block_set.all().count(),
+        }
+
+    def get_partials(self, instance):
+        if 'view' not in self.context or self.context['view'].get_view_name() != 'Launcher Instance':
+            return {}
+        last_day = instance.partial_set.filter(timestamp__gte=int(time.time()) - 60 * 60 * 24)
+        total = last_day.count()
+        successful = last_day.filter(error=None).count()
+        failed = last_day.exclude(error=None).count()
+        return {
+            'total': total,
+            'points': last_day.aggregate(points=Sum('difficulty'))['points'] or 0,
+            'successful': successful,
+            'failed': failed,
+            'performance': (successful / total) * 100,
+            'harvesters': last_day.aggregate(num=Count('harvester_id', distinct=True))['num'],
         }
 
     def to_representation(self, instance):
