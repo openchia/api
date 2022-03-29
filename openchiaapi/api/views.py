@@ -190,6 +190,7 @@ class StatsView(APIView):
                 textwrap.dedent('''from(bucket: "openchia")
                   |> range(start: duration(v: "-30m"))
                   |> filter(fn: (r) => r["_measurement"] == "mempool")
+                  |> filter(fn: (r) => r["_field"] == "full_pct")
                   |> last()'''),
             )
             mempool_full_pct = int(q[0].records[0]['_value'])
