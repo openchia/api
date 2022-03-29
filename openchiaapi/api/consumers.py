@@ -50,6 +50,7 @@ class LogTask(object):
 
         proc = await asyncio.create_subprocess_exec(
             'tail',
+            '-q',
             '-F',
             '-n', str(LOG_LINES),
             os.path.join(LOG_DIR, 'main.log.json'),
@@ -83,9 +84,8 @@ class LogTask(object):
                 break
 
             if not line.startswith(b'{'):
-                continue
-            else:
                 logger.info('Line is not a JSON %r', line)
+                continue
 
             try:
                 data_send.append(json.loads(line.decode(errors='ignore')))
