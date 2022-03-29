@@ -1,10 +1,11 @@
 import asyncio
 import json
+import logging
 import os
 import subprocess
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-
+logger = logging.getLogger('api.consumers')
 LOG_DIR = os.environ.get('POOL_LOG_DIR')
 LOG_TASK = None
 LOG_LINES = 15
@@ -69,6 +70,7 @@ class LogTask(object):
             try:
                 line = await asyncio.wait_for(proc.stdout.readline(), 1)
             except asyncio.TimeoutError:
+                logger.info('Timed out waiting to readline')
                 if data_send:
                     send = list(data_send)
                     self._last += send
@@ -82,6 +84,8 @@ class LogTask(object):
 
             if not line.startswith(b'{'):
                 continue
+            else:
+                logger.info('Line is not a JSON %r', line)
 
             try:
                 data_send.append(json.loads(line.decode(errors='ignore')))
