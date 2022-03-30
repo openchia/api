@@ -57,6 +57,7 @@ class LogTask(object):
             os.path.join(LOG_DIR, 'partial.log.json'),
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
+            limit=128 * 1024,
         )
 
         read_task = asyncio.create_task(self.read(proc))
@@ -72,7 +73,6 @@ class LogTask(object):
                 try:
                     line = await asyncio.wait_for(proc.stdout.readline(), 1)
                 except asyncio.TimeoutError:
-                    logger.info('Timed out waiting to readline')
                     if data_send:
                         send = list(data_send)
                         self._last += send
@@ -80,6 +80,10 @@ class LogTask(object):
                         data_send[:] = []
                         await self.send(send)
                     continue
+                except ValueError as e:
+                    if 'but chunk is longer than limit' in str(e):
+                        continue
+                    raise
 
                 if not line:
                     break
