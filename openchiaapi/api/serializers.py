@@ -189,6 +189,16 @@ class BlockSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
+class BlockMinimalSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Block
+        fields = [
+            'farmed_height',
+            'timestamp',
+        ]
+
+
 class LoginSerializer(serializers.Serializer):
     launcher_id = serializers.CharField()
     authentication_token = serializers.IntegerField()
@@ -206,6 +216,7 @@ class PartialSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class PayoutSerializer(serializers.HyperlinkedModelSerializer):
+    blocks = BlockMinimalSerializer(many=True)
 
     class Meta:
         model = Payout
