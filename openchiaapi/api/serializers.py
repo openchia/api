@@ -1,7 +1,10 @@
 import time
+from datetime import timedelta
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Sum
+from django.db.models.functions import Trunc
+from django.utils import timezone
 from rest_framework import serializers
 
 from pool.util import calculate_effort, days_pooling, stay_fee_discount, size_discount
@@ -19,6 +22,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
     fee = serializers.SerializerMethodField('get_fee')
     blocks = serializers.SerializerMethodField('get_blocks')
     partials = serializers.SerializerMethodField('get_partials')
+    rewards = serializers.SerializerMethodField('get_rewards')
 
     class Meta:
         model = Launcher
@@ -39,6 +43,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'points_of_total',
             'blocks',
             'partials',
+            'rewards',
         ]
 
     def get_points_of_total(self, instance):
@@ -99,6 +104,38 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             'failed': failed,
             'performance': (successful / total) * 100 if total else None,
             'harvesters': last_day.aggregate(num=Count('harvester_id', distinct=True))['num'],
+        }
+
+    def get_rewards(self, instance):
+        if 'view' not in self.context or self.context['view'].get_view_name() != 'Launcher Instance':
+            return {}
+        pa = PayoutAddress.objects.filter(launcher=instance)
+        today = pa.filter(
+            payout__datetime__date=timezone.now().date()
+        ).aggregate(total=Sum('amount'))['total']
+
+        last_24h = pa.filter(
+            payout__datetime__date__gte=timezone.now() - timedelta(hours=24)
+        ).aggregate(total=Sum('amount'))['total']
+
+        last_7d = pa.filter(
+            payout__datetime__date__gte=timezone.now() - timedelta(days=7)
+        ).aggregate(total=Sum('amount'))['total']
+
+        last_30d = pa.filter(
+            payout__datetime__date__gte=timezone.now() - timedelta(days=30)
+        ).aggregate(total=Sum('amount'))['total']
+
+        last_per_day = pa.filter(
+            payout__datetime__date__gte=timezone.now() - timedelta(days=7)
+        ).annotate(day=Trunc('payout__datetime', 'day')).values('day').annotate(amount=Sum('amount')).order_by('day')
+
+        return {
+            'today': today,
+            'last_24h': last_24h,
+            'last_7d': last_7d,
+            'last_30d': last_30d,
+            'last_per_day': last_per_day,
         }
 
     def to_representation(self, instance):
