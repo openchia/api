@@ -119,19 +119,19 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
         ).aggregate(total=Sum('amount'))['total']
 
         last_24h = pa.filter(
-            payout__datetime__date__gte=timezone.now() - timedelta(hours=24)
+            payout__datetime__gte=timezone.now() - timedelta(hours=24)
         ).aggregate(total=Sum('amount'))['total']
 
         last_7d = pa.filter(
-            payout__datetime__date__gte=timezone.now() - timedelta(days=7)
+            payout__datetime__date__gte=timezone.now().date() - timedelta(days=7)
         ).aggregate(total=Sum('amount'))['total']
 
         last_30d = pa.filter(
-            payout__datetime__date__gte=timezone.now() - timedelta(days=30)
+            payout__datetime__date__gte=timezone.now().date() - timedelta(days=30)
         ).aggregate(total=Sum('amount'))['total']
 
         last_per_day = pa.filter(
-            payout__datetime__date__gte=timezone.now() - timedelta(days=7)
+            payout__datetime__date__gte=timezone.now().date() - timedelta(days=7)
         ).annotate(day=Trunc('payout__datetime', 'day')).values('day').annotate(amount=Sum('amount')).order_by('day')
 
         return {
