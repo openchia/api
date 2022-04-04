@@ -114,6 +114,10 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
             payout__datetime__date=timezone.now().date()
         ).aggregate(total=Sum('amount'))['total']
 
+        yesterday = pa.filter(
+            payout__datetime__date=timezone.now().date() - timedelta(days=1)
+        ).aggregate(total=Sum('amount'))['total']
+
         last_24h = pa.filter(
             payout__datetime__date__gte=timezone.now() - timedelta(hours=24)
         ).aggregate(total=Sum('amount'))['total']
@@ -132,6 +136,7 @@ class LauncherSerializer(serializers.HyperlinkedModelSerializer):
 
         return {
             'today': today,
+            'yesterday': yesterday,
             'last_24h': last_24h,
             'last_7d': last_7d,
             'last_30d': last_30d,
