@@ -179,7 +179,8 @@ class StatsView(APIView):
         profitability = 0
         days30 = 30 * 24 * 60 * 60
         for b in block.filter(timestamp__gte=time.time() - days30):
-            profitability += (b.amount / 1000000000000) / (b.pool_space / 1099511627776)
+            if b.pool_space > 0:
+                profitability += (b.amount / 1000000000000) / (b.pool_space / 1099511627776)
         profitability /= 30
 
         client = get_influxdb_client()
