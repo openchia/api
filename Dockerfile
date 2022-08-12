@@ -1,4 +1,4 @@
-FROM caddy:2.4.6-alpine as caddyimage
+FROM caddy:2.5.2-alpine as caddyimage
 FROM debian:stable-slim
 
 # Identify the maintainer of an image
