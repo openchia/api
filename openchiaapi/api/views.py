@@ -14,7 +14,7 @@ from chia.util.bech32m import decode_puzzle_hash
 from chia.util.byte_types import hexstr_to_bytes
 from chia.util.hash import std_hash
 from chia.util.ints import uint64
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Avg, F, Sum, Q
@@ -30,7 +30,7 @@ from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 
 from .models import (
-    Block, GlobalInfo, Launcher, Partial, Payout, PayoutAddress, Space,
+    Block, GlobalInfo, Launcher, Partial, Payout, PayoutAddress,
     Notification,
     Transaction,
 )
@@ -45,7 +45,6 @@ from .serializers import (
     PayoutAddressSerializer,
     PayoutTransactionSerializer,
     StatsSerializer,
-    SpaceSerializer,
     TimeseriesSerializer,
     TransactionSerializer,
     XCHScanStatsSerializer,
@@ -162,9 +161,21 @@ class StatsView(APIView):
         farmers_total = farmers.count()
         farmers_active = farmers.filter(points_pplns__gt=0).count()
         pool_info = get_pool_info()
+
+        client = get_influxdb_client()
+        query_api = client.query_api()
+
         try:
-            size = Space.objects.latest('id').size
-        except Space.DoesNotExist:
+            q = query_api.query(
+                textwrap.dedent('''from(bucket: "openchia")
+                  |> range(start: duration(v: "-30m"))
+                  |> filter(fn: (r) => r["_measurement"] == "pool_size")
+                  |> filter(fn: (r) => r["_field"] == "global")
+                  |> last()'''),
+            )
+            size = int(q[0].records[0]['_value'])
+        except Exception:
+            logger.error('Failed to get pool size', exc_info=True)
             size = 0
 
         globalinfo = GlobalInfo.load()
@@ -182,9 +193,6 @@ class StatsView(APIView):
             if b.pool_space > 0:
                 profitability += (b.amount / 1000000000000) / (b.pool_space / 1099511627776)
         profitability /= 30
-
-        client = get_influxdb_client()
-        query_api = client.query_api()
 
         try:
             q = query_api.query(
@@ -237,9 +245,21 @@ class XCHScanStatsView(APIView):
         block = Block.objects.order_by('-confirmed_block_index')
         farmers = Launcher.objects.filter(is_pool_member=True).count()
         pool_info = get_pool_info()
+
+        client = get_influxdb_client()
+        query_api = client.query_api()
+
         try:
-            size = Space.objects.latest('id').size
-        except Space.DoesNotExist:
+            q = query_api.query(
+                textwrap.dedent('''from(bucket: "openchia")
+                  |> range(start: duration(v: "-30m"))
+                  |> filter(fn: (r) => r["_measurement"] == "pool_size")
+                  |> filter(fn: (r) => r["_field"] == "global")
+                  |> last()'''),
+            )
+            size = int(q[0].records[0]['_value'])
+        except Exception:
+            logger.error('Failed to get pool size', exc_info=True)
             size = 0
 
         pi = XCHScanStatsSerializer(data={
@@ -451,27 +471,6 @@ class PayoutTransactionViewSet(APIView):
             'request': request,
         })
         return paginator.get_paginated_response(serializer.data)
-
-
-class SpaceView(APIView):
-    DEFAULT_DAYS = 30
-    days_param = openapi.Parameter(
-        'days',
-        openapi.IN_QUERY,
-        description=f'Number of days (default: {DEFAULT_DAYS})',
-        type=openapi.TYPE_INTEGER,
-    )
-
-    @swagger_auto_schema(
-        manual_parameters=[days_param],
-        responses={200: SpaceSerializer(many=True)}
-    )
-    def get(self, request, format=None):
-        days = self.request.query_params.get('days') or self.DEFAULT_DAYS
-        size = Space.objects.filter(
-            date__gte=datetime.now() - timedelta(days=int(days))
-        ).order_by('date')
-        return Response([{'date': i.date, 'size': i.size} for i in size])
 
 
 class LauncherSizeView(APIView):

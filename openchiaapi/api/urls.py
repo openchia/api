@@ -17,7 +17,6 @@ from .views import (
     PoolSizeView,
     QRCodeView,
     StatsView,
-    SpaceView,
     TransactionViewSet,
     XCHPriceView,
     XCHScanStatsView,
@@ -54,5 +53,4 @@ urlpatterns = [
     path('loggedin', LoggedInView.as_view()),
     path('stats', StatsView.as_view()),
     path('xchscan_stats', XCHScanStatsView.as_view()),
-    path('space', SpaceView.as_view()),
 ]

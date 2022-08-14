@@ -209,15 +209,6 @@ class PayoutAddress(models.Model):
     transaction = models.ForeignKey(Transaction, null=True, on_delete=models.SET_NULL)
 
 
-class Space(models.Model):
-
-    class Meta:
-        db_table = 'space'
-
-    date = models.DateTimeField()
-    size = models.BigIntegerField()
-
-
 class SingletonModel(models.Model):
 
     class Meta:
