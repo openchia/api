@@ -1,7 +1,7 @@
 git+https://github.com/openchia/chia-blockchain.git@issues/websockets#egg=chia-blockchain
 git+https://github.com/openchia/pool.git@main#egg=pool
-djangorestframework==3.13.1
-drf-yasg==1.20.0
+djangorestframework==3.14.0
+drf-yasg==1.21.7
 requests==2.25.1
 django-filter==2.4.0
 psycopg2==2.9.1
