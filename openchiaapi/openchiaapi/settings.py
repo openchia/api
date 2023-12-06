@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = django_settings.get('secret_key') or 'django-insecure'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = django_settings.get('debug', True)
+DEBUG = django_settings.get('debug', False)
 
 ALLOWED_HOSTS = django_settings.get('allowed_hosts') or ['localhost']
 
