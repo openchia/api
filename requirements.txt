@@ -1,4 +1,4 @@
-git+https://github.com/openchia/chia-blockchain.git@issues/websockets#egg=chia-blockchain
+git+https://github.com/openchia/chia-blockchain.git@stable/2.1#egg=chia-blockchain
 git+https://github.com/openchia/pool.git@main#egg=pool
 djangorestframework==3.14.0
 drf-yasg==1.21.7
