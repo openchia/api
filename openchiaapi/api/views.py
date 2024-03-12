@@ -168,7 +168,7 @@ class StatsView(APIView):
         try:
             q = query_api.query(
                 textwrap.dedent('''from(bucket: "openchia")
-                  |> range(start: duration(v: "-30m"))
+                  |> range(start: duration(v: "-60m"))
                   |> filter(fn: (r) => r["_measurement"] == "pool_size")
                   |> filter(fn: (r) => r["_field"] == "global")
                   |> last()'''),
@@ -197,7 +197,7 @@ class StatsView(APIView):
         try:
             q = query_api.query(
                 textwrap.dedent('''from(bucket: "openchia")
-                  |> range(start: duration(v: "-30m"))
+                  |> range(start: duration(v: "-60m"))
                   |> filter(fn: (r) => r["_measurement"] == "mempool")
                   |> filter(fn: (r) => r["_field"] == "full_pct")
                   |> last()'''),
@@ -252,7 +252,7 @@ class XCHScanStatsView(APIView):
         try:
             q = query_api.query(
                 textwrap.dedent('''from(bucket: "openchia")
-                  |> range(start: duration(v: "-30m"))
+                  |> range(start: duration(v: "-60m"))
                   |> filter(fn: (r) => r["_measurement"] == "pool_size")
                   |> filter(fn: (r) => r["_field"] == "global")
                   |> last()'''),
