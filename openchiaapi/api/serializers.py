@@ -198,13 +198,7 @@ class LauncherUpdateSerializer(serializers.Serializer):
     fcm_token = serializers.CharField(required=False, allow_null=True)
     push_missing_partials_hours = serializers.CharField(required=False, allow_null=True)
     push_block_farmed = serializers.BooleanField(required=False)
-    custom_difficulty = serializers.ChoiceField(required=False, allow_null=True, choices=(
-        ('LOWEST', 'Lowest'),
-        ('LOW', 'Low'),
-        ('MEDIUM', 'Medium'),
-        ('HIGH', 'High'),
-        ('HIGHEST', 'Highest'),
-    ))
+    custom_difficulty = serializers.CharField(required=False, allow_null=True)
     minimum_payout = serializers.IntegerField(required=False, allow_null=True)
 
     payment = serializers.MultipleChoiceField(choices=(
@@ -221,6 +215,20 @@ class LauncherUpdateSerializer(serializers.Serializer):
     size_drop_percent = serializers.IntegerField(
         required=False, allow_null=True, min_value=20, max_value=100,
     )
+
+    def validate_custom_difficulty(self, value):
+        if value.startswith('CUSTOM:'):
+            try:
+                difficulty = int(value[7:])
+            except Exception:
+                raise serializers.ValidationError('Invalid difficulty')
+            if difficulty < 10:
+                serializers.ValidationError('Farmers should send at least 10 partials per day.')
+            if difficulty < 2000:
+                serializers.ValidationError('Farmers should not send more than 2000 partials per day.')
+        elif value not in ('LOWEST', 'LOW', 'MEDIUM', 'HIGH', 'HIGHEST'):
+            raise serializers.ValidationError('Invalid difficulty')
+        return value
 
 
 class BlockSerializer(serializers.HyperlinkedModelSerializer):
