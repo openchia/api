@@ -7,7 +7,7 @@ import qrcode
 import qrcode.image.svg
 import textwrap
 
-from blspy import AugSchemeMPL, G1Element, G2Element
+from chia_rs import AugSchemeMPL, G1Element, G2Element
 from chia.pools.pool_wallet_info import PoolState
 from chia.protocols.pool_protocol import validate_authentication_token, AuthenticationPayload
 from chia.util.bech32m import decode_puzzle_hash
